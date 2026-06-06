@@ -3,7 +3,7 @@
 import { useCallback } from "react"
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import X from "lucide-react/dist/esm/icons/x"
+import { X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { EmptyCartState } from "@/components/cart/empty-cart-state"

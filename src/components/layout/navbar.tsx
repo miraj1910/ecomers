@@ -2,10 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Menu from "lucide-react/dist/esm/icons/menu"
-import Search from "lucide-react/dist/esm/icons/search"
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag"
-import X from "lucide-react/dist/esm/icons/x"
+import { Menu, Search, ShoppingBag, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { NavLinks } from "./nav-links"
 import { SearchBar } from "@/components/search/search-bar"

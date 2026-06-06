@@ -1,6 +1,6 @@
 "use client"
 
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag"
+import { ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface EmptyCartStateProps {

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import X from "lucide-react/dist/esm/icons/x"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const links = [

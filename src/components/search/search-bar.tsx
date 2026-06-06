@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import Search from "lucide-react/dist/esm/icons/search"
-import X from "lucide-react/dist/esm/icons/x"
+import { Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SearchBarProps {

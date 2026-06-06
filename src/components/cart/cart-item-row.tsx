@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import Trash2 from "lucide-react/dist/esm/icons/trash-2"
+import { Trash2 } from "lucide-react"
 import { QuantitySelector } from "@/components/shared/quantity-selector"
 import { formatCartPrice } from "@/lib/cart"
 import type { CartItem as CartItemType } from "@/types"

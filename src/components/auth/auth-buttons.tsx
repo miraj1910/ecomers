@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { UserMenu } from "@/components/auth/user-menu"
-import User from "lucide-react/dist/esm/icons/user"
+import { User } from "lucide-react"
 import Link from "next/link"
 
 export function AuthButtons() {
