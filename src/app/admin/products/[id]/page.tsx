@@ -1,0 +1,22 @@
+import { redirect, notFound } from "next/navigation"
+import { auth } from "@/lib/auth"
+import { getAdminProduct } from "@/lib/actions/admin"
+import { ProductForm } from "@/components/admin/product-form"
+
+export default async function EditProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== "ADMIN") redirect("/")
+
+  const { id } = await params
+
+  try {
+    const product = await getAdminProduct(id)
+    return <ProductForm initialData={product} productId={id} />
+  } catch {
+    notFound()
+  }
+}

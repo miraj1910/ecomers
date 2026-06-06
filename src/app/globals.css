@@ -1,26 +1,177 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: #F7F2EA;
+  --color-foreground: #181511;
+  --color-secondary: #6E665D;
+  --color-muted: #9C9288;
+  --color-border: rgba(35, 30, 24, 0.12);
+  --color-surface: #FFFDF9;
+  --color-accent: #181511;
+  --color-accent-foreground: #F7F2EA;
+  --color-sale: #9B3D2E;
+  --color-star: #B08A45;
+  --color-ring: #8A7561;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.5rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #F7F2EA;
+  --color-foreground: #181511;
+  --color-secondary: #6E665D;
+  --color-muted: #9C9288;
+  --color-border: rgba(35, 30, 24, 0.12);
+  --color-surface: #FFFDF9;
+  --color-accent: #181511;
+  --color-accent-foreground: #F7F2EA;
+  --color-sale: #9B3D2E;
+  --color-star: #B08A45;
+  --color-ring: #8A7561;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.light {
+  --color-background: #F7F2EA;
+  --color-foreground: #181511;
+  --color-secondary: #6E665D;
+  --color-muted: #9C9288;
+  --color-border: rgba(35, 30, 24, 0.12);
+  --color-surface: #FFFDF9;
+  --color-accent: #181511;
+  --color-accent-foreground: #F7F2EA;
+  --color-sale: #9B3D2E;
+  --color-star: #B08A45;
+  --color-ring: #8A7561;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --color-background: #181511;
+  --color-foreground: #F7F2EA;
+  --color-secondary: #C8BCAF;
+  --color-muted: #8F8378;
+  --color-border: rgba(247, 242, 234, 0.14);
+  --color-surface: #211D18;
+  --color-accent: #E9DDCC;
+  --color-accent-foreground: #181511;
+  --color-sale: #D29A86;
+  --color-star: #D4B16F;
+  --color-ring: #C8BCAF;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(138, 117, 97, 0.28);
+  color: var(--color-foreground);
+}
+
+.light ::selection {
+  background-color: rgba(138, 117, 97, 0.22);
+  color: #181511;
+}
+
+* {
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.editorial-container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1500px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.editorial-kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.serif-heading {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@media (width >= 768px) {
+  .editorial-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (width >= 1280px) {
+  .editorial-container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility container-main {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: 100%;
+
+  @media (width >= 640px) {
+    max-width: 640px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (width >= 768px) {
+    max-width: 768px;
+  }
+
+  @media (width >= 1024px) {
+    max-width: 1024px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (width >= 1280px) {
+    max-width: 1280px;
+  }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@utility animate-fade-up {
+  animation: fadeInUp 0.8s ease-out forwards;
 }
