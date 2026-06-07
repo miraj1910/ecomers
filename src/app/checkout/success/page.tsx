@@ -51,9 +51,14 @@ export default async function CheckoutSuccessPage({
     )
   }
 
-  const order = await prisma.order.findUnique({
-    where: { stripeSessionId },
-  })
+  let order: Awaited<ReturnType<typeof prisma.order.findUnique>> = null
+  try {
+    order = await prisma.order.findUnique({
+      where: { stripeSessionId },
+    })
+  } catch (error) {
+    console.error("Failed to look up order:", error)
+  }
 
   return (
     <div className="mx-auto max-w-md px-4 py-24 text-center">

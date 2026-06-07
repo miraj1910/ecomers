@@ -14,14 +14,23 @@ export default async function AdminProducts({
   if (!session?.user || session.user.role !== "ADMIN") redirect("/")
 
   const params = await searchParams
-  const data = await getAdminProducts({
-    page: params.page ? Number(params.page) : 1,
-    search: params.search,
-    category: params.category,
-    status: params.status,
-    sortBy: params.sortBy,
-    sortOrder: params.sortOrder,
-  })
+  let data: Awaited<ReturnType<typeof getAdminProducts>> | null = null
+  try {
+    data = await getAdminProducts({
+      page: params.page ? Number(params.page) : 1,
+      search: params.search,
+      category: params.category,
+      status: params.status,
+      sortBy: params.sortBy,
+      sortOrder: params.sortOrder,
+    })
+  } catch (error) {
+    console.error("Failed to load admin products:", error)
+  }
+
+  if (!data) {
+    return <div className="p-8 text-secondary">Unable to load products.</div>
+  }
 
   return <AdminProductsTable initialData={data} />
 }

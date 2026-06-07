@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
@@ -6,16 +7,23 @@ import { Section } from "@/components/layout/section"
 import { User, Mail, Shield, Calendar, BadgeCheck } from "lucide-react"
 import Link from "next/link"
 
+type UserProfile = Prisma.UserGetPayload<{ select: { role: true; createdAt: true } }>
+
 export const dynamic = "force-dynamic"
 
 export default async function ProfilePage() {
   const session = await auth()
   if (!session?.user) redirect("/sign-in")
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true, createdAt: true },
-  })
+  let dbUser: UserProfile | null = null
+  try {
+    dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true, createdAt: true },
+    })
+  } catch (error) {
+    console.error("Failed to load user data:", error)
+  }
 
   const user = session.user
   const email = user.email ?? ""

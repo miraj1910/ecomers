@@ -17,7 +17,16 @@ export default async function AdminInventory({
   const page = params.page ? Number(params.page) : 1
   const search = params.search
 
-  const data = await getInventoryPage(page, 20, search)
+  let data: Awaited<ReturnType<typeof getInventoryPage>> | null = null
+  try {
+    data = await getInventoryPage(page, 20, search)
+  } catch (error) {
+    console.error("Failed to load inventory:", error)
+  }
+
+  if (!data) {
+    return <div className="p-8 text-secondary">Unable to load inventory.</div>
+  }
 
   return <InventoryClient initialData={data} />
 }

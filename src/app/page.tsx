@@ -26,7 +26,12 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const storeProducts = await getFeaturedStoreProducts(8)
+  let storeProducts: Awaited<ReturnType<typeof getFeaturedStoreProducts>> = []
+  try {
+    storeProducts = await getFeaturedStoreProducts(8)
+  } catch (error) {
+    console.error("Failed to load featured products from database:", error)
+  }
 
   const products = storeProducts.map((p) => ({
     name: p.name,

@@ -14,7 +14,25 @@ export default async function AdminDashboard() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/")
 
-  const stats = await getDashboardStats()
+  let stats: Awaited<ReturnType<typeof getDashboardStats>> | null = null
+  try {
+    stats = await getDashboardStats()
+  } catch (error) {
+    console.error("Failed to load dashboard stats:", error)
+  }
+
+  if (!stats) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+          <p className="mt-1 text-sm text-secondary">
+            Unable to load dashboard data. Please try again later.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const statCards = [
     {

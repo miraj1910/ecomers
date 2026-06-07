@@ -1,3 +1,4 @@
+import type { Order, OrderItem } from "@prisma/client"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -6,6 +7,8 @@ import { prisma } from "@/lib/prisma"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { ArrowLeft, CreditCard, Package, Truck } from "lucide-react"
+
+type OrderWithItems = Order & { items: OrderItem[] }
 
 export const dynamic = "force-dynamic"
 
@@ -49,10 +52,15 @@ export default async function OrderDetailPage({
 
   const { id } = await params
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: { items: true },
-  })
+  let order: OrderWithItems | null = null
+  try {
+    order = await prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    })
+  } catch (error) {
+    console.error("Failed to load order:", error)
+  }
 
   if (!order || order.userId !== session.user.id) {
     notFound()

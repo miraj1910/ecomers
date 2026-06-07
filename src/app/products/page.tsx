@@ -68,7 +68,12 @@ export default async function ProductsPage({ searchParams }: Props) {
     }))
   }
 
-  const dbProducts = await getStoreProducts()
+  let dbProducts: SanityProduct[] = []
+  try {
+    dbProducts = await getStoreProducts()
+  } catch (error) {
+    console.error("Failed to load products from database:", error)
+  }
 
   const products = [...sanityOrMdxProducts, ...dbProducts]
 
@@ -93,7 +98,12 @@ export default async function ProductsPage({ searchParams }: Props) {
     }))
   }
 
-  const dbCategoryList = await getStoreCategories()
+  let dbCategoryList: { title: string; slug: string }[] = []
+  try {
+    dbCategoryList = await getStoreCategories()
+  } catch (error) {
+    console.error("Failed to load store categories:", error)
+  }
   for (const dbCat of dbCategoryList) {
     if (!categoryList.find((c) => c.slug === dbCat.slug)) {
       categoryList.push(dbCat)

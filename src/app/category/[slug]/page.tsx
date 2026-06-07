@@ -44,8 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     if (!exists) {
-      const dbCats = await getStoreCategories()
-      exists = dbCats.some((c) => c.slug === slug)
+      try {
+        const dbCats = await getStoreCategories()
+        exists = dbCats.some((c) => c.slug === slug)
+      } catch (error) {
+        console.error("Failed to check category existence:", error)
+      }
     }
 
     if (!exists) notFound()
@@ -132,9 +136,19 @@ export default async function CategoryPage({ params }: Props) {
       })
       const exists = cats.some((c) => c.slug === slug)
       if (!exists) {
-        const dbCats = await getStoreCategories()
+        let dbCats: { title: string; slug: string }[] = []
+        try {
+          dbCats = await getStoreCategories()
+        } catch (error) {
+          console.error("Failed to load store categories:", error)
+        }
         if (!dbCats.some((c) => c.slug === slug)) notFound()
-        const dbProducts = await getStoreProductsByCategory(slug)
+        let dbProducts: SanityProduct[] = []
+        try {
+          dbProducts = await getStoreProductsByCategory(slug)
+        } catch (error) {
+          console.error("Failed to load products by category:", error)
+        }
         return (
           <Section>
             <Container>
@@ -171,9 +185,19 @@ export default async function CategoryPage({ params }: Props) {
       const cats = getCategories()
       const exists = cats.some((c) => c.slug === slug)
       if (!exists) {
-        const dbCats = await getStoreCategories()
+        let dbCats: { title: string; slug: string }[] = []
+        try {
+          dbCats = await getStoreCategories()
+        } catch (error) {
+          console.error("Failed to load store categories:", error)
+        }
         if (!dbCats.some((c) => c.slug === slug)) notFound()
-        const dbProducts = await getStoreProductsByCategory(slug)
+        let dbProducts: SanityProduct[] = []
+        try {
+          dbProducts = await getStoreProductsByCategory(slug)
+        } catch (error) {
+          console.error("Failed to load products by category:", error)
+        }
         return (
           <Section>
             <Container>
@@ -195,7 +219,12 @@ export default async function CategoryPage({ params }: Props) {
     }
   }
 
-  const dbProducts = await getStoreProductsByCategory(slug)
+  let dbProducts: SanityProduct[] = []
+  try {
+    dbProducts = await getStoreProductsByCategory(slug)
+  } catch (error) {
+    console.error("Failed to load products by category:", error)
+  }
   if (dbProducts.length > 0) {
     for (const dbp of dbProducts) {
       if (!products.find((p) => p.slug === dbp.slug)) {

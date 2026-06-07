@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
+import { Pool } from "pg"
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -13,7 +14,18 @@ if (!databaseUrl) {
   )
 }
 
-const adapter = new PrismaPg(databaseUrl)
+const pool = new Pool({
+  connectionString: databaseUrl,
+  max: 1,
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 10000,
+})
+
+pool.on("error", (err) => {
+  console.error("Unexpected database pool error", err)
+})
+
+const adapter = new PrismaPg(pool)
 
 export const prisma =
   globalForPrisma.prisma ?? new PrismaClient({ adapter })

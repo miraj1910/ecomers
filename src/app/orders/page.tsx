@@ -1,3 +1,4 @@
+import type { Order, OrderItem } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
@@ -5,6 +6,8 @@ import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { PackageOpen, ChevronRight } from "lucide-react"
 import Link from "next/link"
+
+type OrderWithItems = Order & { items: OrderItem[] }
 
 export const dynamic = "force-dynamic"
 
@@ -35,11 +38,16 @@ export default async function OrdersPage() {
   const session = await auth()
   if (!session?.user) redirect("/sign-in")
 
-  const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
-    include: { items: true },
-    orderBy: { createdAt: "desc" },
-  })
+  let orders: OrderWithItems[] = []
+  try {
+    orders = await prisma.order.findMany({
+      where: { userId: session.user.id },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    })
+  } catch (error) {
+    console.error("Failed to load orders:", error)
+  }
 
   return (
     <Section>

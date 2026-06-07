@@ -14,11 +14,20 @@ export default async function AdminOrders({
   if (!session?.user || session.user.role !== "ADMIN") redirect("/")
 
   const params = await searchParams
-  const data = await getAdminOrders({
-    page: params.page ? Number(params.page) : 1,
-    search: params.search,
-    status: params.status,
-  })
+  let data: Awaited<ReturnType<typeof getAdminOrders>> | null = null
+  try {
+    data = await getAdminOrders({
+      page: params.page ? Number(params.page) : 1,
+      search: params.search,
+      status: params.status,
+    })
+  } catch (error) {
+    console.error("Failed to load admin orders:", error)
+  }
+
+  if (!data) {
+    return <div className="p-8 text-secondary">Unable to load orders.</div>
+  }
 
   return <AdminOrdersClient initialData={data} />
 }

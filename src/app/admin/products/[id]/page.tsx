@@ -18,7 +18,8 @@ export default async function EditProductPage({
   try {
     const product = await getAdminProduct(id)
     return <ProductForm initialData={product} productId={id} />
-  } catch {
+  } catch (error) {
+    console.error("Failed to load product:", error)
     notFound()
   }
 }

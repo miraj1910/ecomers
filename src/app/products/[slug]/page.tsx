@@ -56,8 +56,13 @@ async function findProduct(slug: string): Promise<SanityProduct | null> {
     }
   }
 
-  const dbProduct = await getStoreProductBySlug(slug)
-  return dbProduct
+  try {
+    const dbProduct = await getStoreProductBySlug(slug)
+    return dbProduct
+  } catch (error) {
+    console.error("Failed to load product from database:", error)
+    return null
+  }
 }
 
 async function findProductFull(slug: string): Promise<{
@@ -122,14 +127,18 @@ async function findProductFull(slug: string): Promise<{
   }
 
   if (!product) {
-    const dbProduct = await getStoreProductBySlug(slug)
-    if (dbProduct) {
-      product = dbProduct
-      const allDb = await getStoreProducts()
-      const categorySlug = dbProduct.category?.slug
-      related = allDb
-        .filter((p) => p.slug !== slug && p.category?.slug === categorySlug)
-        .slice(0, 4)
+    try {
+      const dbProduct = await getStoreProductBySlug(slug)
+      if (dbProduct) {
+        product = dbProduct
+        const allDb = await getStoreProducts()
+        const categorySlug = dbProduct.category?.slug
+        related = allDb
+          .filter((p) => p.slug !== slug && p.category?.slug === categorySlug)
+          .slice(0, 4)
+      }
+    } catch (error) {
+      console.error("Failed to load product data from database:", error)
     }
   }
 
@@ -138,7 +147,12 @@ async function findProductFull(slug: string): Promise<{
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const product = await findProduct(slug)
+  let product: SanityProduct | null = null
+  try {
+    product = await findProduct(slug)
+  } catch (error) {
+    console.error("Failed to load product metadata:", error)
+  }
 
   if (!product) notFound()
 
@@ -172,11 +186,24 @@ export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params
   const session = await auth()
 
-  const { product, related } = await findProductFull(slug)
+  let product: SanityProduct | null = null
+  let related: SanityProduct[] = []
+  try {
+    const result = await findProductFull(slug)
+    product = result.product
+    related = result.related
+  } catch (error) {
+    console.error("Failed to load product details from database:", error)
+  }
 
   if (!product) notFound()
 
-  const productRating = await getProductRating(slug)
+  let productRating: Awaited<ReturnType<typeof getProductRating>> | null = null
+  try {
+    productRating = await getProductRating(slug)
+  } catch (error) {
+    console.error("Failed to load product rating:", error)
+  }
 
   const images = product.images?.length
     ? product.images
