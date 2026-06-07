@@ -30,5 +30,13 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "prisma"]
+  "exclude": [
+    "node_modules",
+    "prisma",
+    "scripts",
+    "src/tests",
+    "src/__tests__",
+    "playwright-report",
+    "test-results"
+  ]
 }

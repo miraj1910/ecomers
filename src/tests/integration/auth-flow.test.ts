@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
 
 const mockSession = {
-  user: { id: "user-1", name: "Test", email: "test@example.com", image: "", role: "CUSTOMER" as const },
+  user: { id: "user-1", name: "Test", email: "test@example.com", image: "", role: "CUSTOMER" as string },
   expires: new Date(Date.now() + 3600000).toISOString(),
 }
 
