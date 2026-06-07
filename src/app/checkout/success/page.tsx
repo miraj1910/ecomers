@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { siteConfig } from "@/lib/seo/metadata"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Order Confirmation",
   description: "Your order has been confirmed.",

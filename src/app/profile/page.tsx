@@ -6,6 +6,8 @@ import { Section } from "@/components/layout/section"
 import { User, Mail, Shield, Calendar, BadgeCheck } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export default async function ProfilePage() {
   const session = await auth()
   if (!session?.user) redirect("/sign-in")

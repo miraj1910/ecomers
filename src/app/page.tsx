@@ -3,6 +3,8 @@ import { siteConfig } from "@/lib/seo/metadata"
 import { LuxuryLanding } from "@/components/shared/luxury-landing"
 import { getFeaturedStoreProducts } from "@/actions/store-products"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   alternates: { canonical: siteConfig.url },
   openGraph: {

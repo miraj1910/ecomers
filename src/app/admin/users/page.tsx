@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { getAdminUsers } from "@/lib/actions/admin"
 import { AdminUsersClient } from "@/components/admin/users-client"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminUsers({
   searchParams,
 }: {

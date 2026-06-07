@@ -8,6 +8,8 @@ import { RecentOrdersTable } from "@/components/admin/dashboard/recent-orders-ta
 import { LowStockAlerts } from "@/components/admin/dashboard/low-stock-alerts"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminDashboard() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/")

@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { getInventoryPage } from "@/actions/inventory"
 import { InventoryClient } from "@/components/admin/inventory/inventory-client"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminInventory({
   searchParams,
 }: {

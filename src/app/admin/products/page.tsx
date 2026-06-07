@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { getAdminProducts } from "@/lib/actions/admin"
 import { AdminProductsTable } from "@/components/admin/products-table"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminProducts({
   searchParams,
 }: {

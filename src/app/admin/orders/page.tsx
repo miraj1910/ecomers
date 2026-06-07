@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth"
 import { getAdminOrders } from "@/lib/actions/admin"
 import { AdminOrdersClient } from "@/components/admin/orders-client"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminOrders({
   searchParams,
 }: {

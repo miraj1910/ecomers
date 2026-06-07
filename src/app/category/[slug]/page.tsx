@@ -15,39 +15,17 @@ import {
   getCategories,
   getProductsByCategory,
 } from "@/lib/products"
-import { getStoreProductsByCategory, getStoreProducts, getStoreCategories } from "@/actions/store-products"
+import { getStoreProductsByCategory, getStoreCategories } from "@/actions/store-products"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct, SanityCategory } from "@/sanity"
+
+export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
 const knownSlugs = ["all", "new-arrivals", "sale"] as const
-
-export async function generateStaticParams() {
-  const slugs: { slug: string }[] = []
-
-  if (isSanityConfigured()) {
-    const cats = await sanityFetch<SanityCategory[]>({
-      query: categoriesQuery,
-    })
-    slugs.push(...cats.map((c) => ({ slug: c.slug })))
-  } else {
-    const cats = getCategories()
-    slugs.push(...cats.map((c) => ({ slug: c.slug })))
-  }
-
-  const dbCats = await getStoreCategories()
-  for (const c of dbCats) {
-    if (!slugs.find((s) => s.slug === c.slug)) {
-      slugs.push({ slug: c.slug })
-    }
-  }
-
-  slugs.push(...knownSlugs.map((s) => ({ slug: s })))
-  return slugs
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

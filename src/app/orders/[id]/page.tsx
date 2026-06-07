@@ -7,6 +7,8 @@ import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { ArrowLeft, CreditCard, Package, Truck } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 const paymentLabel: Record<string, string> = {
   PENDING: "Pending",
   PAID: "Paid",

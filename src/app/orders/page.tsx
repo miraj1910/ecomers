@@ -6,6 +6,7 @@ import { Section } from "@/components/layout/section"
 import { PackageOpen, ChevronRight } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
 
 const statusConfig: Record<string, { label: string; colors: string }> = {
   PENDING: {

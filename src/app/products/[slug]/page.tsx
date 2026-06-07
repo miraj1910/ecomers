@@ -16,7 +16,6 @@ import {
   sanityFetch,
   productBySlugQuery,
   relatedProductsQuery,
-  productIdsQuery,
   isSanityConfigured,
 } from "@/sanity"
 import { getProductBySlug, getAllProducts } from "@/lib/products"
@@ -26,33 +25,10 @@ import { getProductRating } from "@/actions/reviews"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct } from "@/sanity"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-  const slugs: { slug: string }[] = []
-
-  if (isSanityConfigured()) {
-    const s = await sanityFetch<{ slug: string }[]>({
-      query: productIdsQuery,
-    })
-    slugs.push(...s)
-  } else {
-    const { getAllSlugs } = await import("@/lib/content")
-    for (const slug of getAllSlugs("products")) {
-      slugs.push({ slug })
-    }
-  }
-
-  const dbProducts = await getStoreProducts()
-  for (const p of dbProducts) {
-    if (!slugs.find((s) => s.slug === p.slug)) {
-      slugs.push({ slug: p.slug })
-    }
-  }
-
-  return slugs
 }
 
 async function findProduct(slug: string): Promise<SanityProduct | null> {
