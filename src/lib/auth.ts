@@ -9,23 +9,22 @@ function debug(...args: unknown[]) {
   }
 }
 
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  console.error(
-    "[auth] MISSING GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET env vars"
-  )
-}
-if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
-  console.error(
-    "[auth] MISSING AUTH_SECRET or NEXTAUTH_SECRET env var"
-  )
-}
-
 debug("GOOGLE_CLIENT_ID set:", !!process.env.GOOGLE_CLIENT_ID)
 debug("GOOGLE_CLIENT_SECRET set:", !!process.env.GOOGLE_CLIENT_SECRET)
 debug("AUTH_SECRET set:", !!process.env.AUTH_SECRET)
 debug("NEXTAUTH_SECRET set:", !!process.env.NEXTAUTH_SECRET)
 debug("NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
 debug("AUTH_URL:", process.env.AUTH_URL)
+
+// Test database connectivity at startup (logged, not blocking)
+;(async () => {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    debug("Database connectivity: OK")
+  } catch (e) {
+    console.error("[auth] Database connectivity FAILED at startup:", e)
+  }
+})()
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -38,16 +37,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/sign-in",
   },
+  logger: {
+    error(error) {
+      console.error("[auth/logger/error]", error instanceof Error ? error.stack || error.message : error)
+    },
+    warn(code) {
+      console.warn("[auth/logger/warn]", code)
+    },
+    debug(message, metadata) {
+      if (process.env.NODE_ENV === "development" || process.env.AUTH_DEBUG) {
+        console.log("[auth/logger/debug]", message, metadata ?? "")
+      }
+    },
+  },
   callbacks: {
-    async signIn({ user }) {
-      if (!user.email) return false
-      const dbUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        select: { status: true, deletedAt: true },
-      })
-      if (dbUser?.deletedAt) return false
-      if (dbUser?.status === "BLOCKED") return false
-      return true
+    async signIn({ user, account, profile }) {
+      debug("signIn callback invoked", { email: user.email, provider: account?.provider })
+      if (!user.email) {
+        debug("signIn: no email, denying")
+        return false
+      }
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { status: true, deletedAt: true },
+        })
+        if (dbUser?.deletedAt) {
+          debug("signIn: user deleted, denying", user.email)
+          return false
+        }
+        if (dbUser?.status === "BLOCKED") {
+          debug("signIn: user blocked, denying", user.email)
+          return false
+        }
+        debug("signIn: user authorized", user.email)
+        return true
+      } catch (e) {
+        console.error("[auth/signIn] Database error in signIn callback:", e)
+        return true
+      }
     },
     async session({ session, user }) {
       if (user) {
@@ -56,6 +84,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = role ?? "CUSTOMER"
       }
       return session
+    },
+  },
+  events: {
+    async signIn(message) {
+      debug("Auth event: signIn", { userId: message.user.id })
+    },
+    async createUser(message) {
+      debug("Auth event: createUser", { userId: message.user.id, email: message.user.email })
+    },
+    async linkAccount(message) {
+      debug("Auth event: linkAccount", { account: { provider: message.account.provider, type: message.account.type } })
     },
   },
   trustHost: true,
