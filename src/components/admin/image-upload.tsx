@@ -13,6 +13,21 @@ interface ImageUploadProps {
 export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false)
 
+  const processFiles = async (files: File[]) => {
+    const remaining = maxImages - images.length
+    const toProcess = files.slice(0, remaining)
+
+    const newImages: string[] = []
+    for (const file of toProcess) {
+      const url = await readFileAsDataURL(file)
+      newImages.push(url)
+    }
+
+    if (newImages.length > 0) {
+      onChange([...images, ...newImages])
+    }
+  }
+
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -44,21 +59,6 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [images, onChange, maxImages]
   )
-
-  const processFiles = async (files: File[]) => {
-    const remaining = maxImages - images.length
-    const toProcess = files.slice(0, remaining)
-
-    const newImages: string[] = []
-    for (const file of toProcess) {
-      const url = await readFileAsDataURL(file)
-      newImages.push(url)
-    }
-
-    if (newImages.length > 0) {
-      onChange([...images, ...newImages])
-    }
-  }
 
   const removeImage = useCallback(
     (index: number) => {

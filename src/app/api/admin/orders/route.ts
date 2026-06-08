@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { rateLimitMiddleware } from "@/lib/security/rate-limit"
-import { validateBody, validateSearchParams } from "@/lib/api-validation"
+import { validateSearchParams } from "@/lib/api-validation"
 import { orderStatusFilterSchema } from "@/lib/validations/admin"
 import { getAdminOrders, updateOrderStatus } from "@/lib/actions/admin"
 

@@ -149,7 +149,7 @@ const productSpecificImages: Record<string, string[]> = {
   ],
 }
 
-let imgIndex: Record<string, number> = {}
+const imgIndex: Record<string, number> = {}
 
 function getNextImage(category: string | null): string {
   const cat = category ?? "Home"

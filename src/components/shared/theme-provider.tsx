@@ -23,6 +23,7 @@ const THEME_KEY = "theme"
 
 function getStoredTheme(): Theme {
   try {
+    if (typeof window === "undefined") return "light"
     const stored = localStorage.getItem(THEME_KEY) as Theme | null
     if (stored === "light" || stored === "dark" || stored === "system") {
       return stored
@@ -31,22 +32,23 @@ function getStoredTheme(): Theme {
   return "light"
 }
 
-function applyTheme(resolved: "light" | "dark") {
-  const root = document.documentElement
-  root.classList.remove("light", "dark")
-  root.classList.add(resolved)
-  root.style.colorScheme = resolved
-}
-
 function resolveTheme(theme: Theme): "light" | "dark" {
   if (theme === "system") {
     try {
+      if (typeof window === "undefined") return "light"
       return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
     } catch {
       return "light"
     }
   }
   return theme
+}
+
+function applyTheme(resolved: "light" | "dark") {
+  const root = document.documentElement
+  root.classList.remove("light", "dark")
+  root.classList.add(resolved)
+  root.style.colorScheme = resolved
 }
 
 function storeTheme(theme: Theme) {
@@ -57,23 +59,38 @@ function storeTheme(theme: Theme) {
   } catch {}
 }
 
+function getInitialTheme(): Theme {
+  try {
+    if (typeof window === "undefined") return "light"
+    const stored = localStorage.getItem(THEME_KEY) as Theme | null
+    if (stored === "light" || stored === "dark" || stored === "system") return stored
+  } catch {}
+  return "light"
+}
+
+function getInitialResolved(): "light" | "dark" {
+  try {
+    if (typeof window === "undefined") return "light"
+    const stored = (localStorage.getItem(THEME_KEY) as Theme | null) ?? "light"
+    if (stored === "light" || stored === "dark" || stored === "system") {
+      return resolveTheme(stored)
+    }
+  } catch {}
+  return "light"
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mounted, setMounted] = useState(false)
-  const [theme, setThemeState] = useState<Theme>("light")
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light")
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(getInitialResolved)
 
   useEffect(() => {
     const stored = getStoredTheme()
-    setThemeState(stored)
-    const resolved = resolveTheme(stored)
-    setResolvedTheme(resolved)
-    applyTheme(resolved)
+    applyTheme(resolveTheme(stored))
     storeTheme(stored)
-    setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (!mounted) return
+    if (typeof window === "undefined") return
     const mq = window.matchMedia("(prefers-color-scheme: dark)")
     const handler = () => {
       if (theme === "system") {
@@ -85,7 +102,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     mq.addEventListener("change", handler)
     return () => mq.removeEventListener("change", handler)
-  }, [theme, mounted])
+  }, [theme])
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)

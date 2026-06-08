@@ -91,11 +91,11 @@ export function DataTable<TData>({
   )
 }
 
-interface DataTablePaginationProps {
-  table: TanStackTable<any>
+interface DataTablePaginationProps<TData> {
+  table: TanStackTable<TData>
 }
 
-export function DataTablePagination({ table }: DataTablePaginationProps) {
+export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
   const pageIndex = table.getState().pagination.pageIndex
   const pageSize = table.getState().pagination.pageSize
   const totalRows = table.getFilteredRowModel().rows.length

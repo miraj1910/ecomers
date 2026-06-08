@@ -42,12 +42,13 @@ export function SearchInput({
   const [query, setQuery] = useState("")
   const [focused, setFocused] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      if (typeof window !== "undefined") return loadRecentSearches()
+    } catch {}
+    return []
+  })
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
-
-  useEffect(() => {
-    setRecentSearches(loadRecentSearches())
-  }, [])
 
   const debouncedQuery = useDebounce(query, 200)
 

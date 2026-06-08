@@ -15,11 +15,13 @@ export default async function EditProductPage({
 
   const { id } = await params
 
+  let product: Awaited<ReturnType<typeof getAdminProduct>> | undefined
   try {
-    const product = await getAdminProduct(id)
-    return <ProductForm initialData={product} productId={id} />
+    product = await getAdminProduct(id)
   } catch (error) {
     console.error("Failed to load product:", error)
     notFound()
   }
+  if (!product) notFound()
+  return <ProductForm initialData={product} productId={id} />
 }

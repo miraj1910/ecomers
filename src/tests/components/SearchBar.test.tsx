@@ -29,10 +29,8 @@ describe("SearchBar", () => {
     expect(input).toHaveValue("")
   })
 
-  it("renders keyboard shortcut hint", () => {
-    const { container } = render(<SearchBar />)
-    const kbd = container.querySelector("kbd")
-    expect(kbd).toBeInTheDocument()
-    expect(kbd).toHaveTextContent("K")
+  it("renders search input with aria label", () => {
+    render(<SearchBar />)
+    expect(screen.getByRole("textbox", { name: "Search" })).toBeInTheDocument()
   })
 })

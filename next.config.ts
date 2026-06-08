@@ -37,8 +37,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       "framer-motion",
       "recharts",
-      "@radix-ui/react-dialog",
-      "@radix-ui/react-dropdown-menu",
     ],
   },
   headers: async () => {

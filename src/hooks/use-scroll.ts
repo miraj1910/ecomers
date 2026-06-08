@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 export function useScroll(threshold = 10) {
   const [scrolled, setScrolled] = useState(false)

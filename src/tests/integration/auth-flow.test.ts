@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect } from "vitest"
 
 const mockSession = {
   user: { id: "user-1", name: "Test", email: "test@example.com", image: "", role: "CUSTOMER" as string },

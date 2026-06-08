@@ -392,17 +392,19 @@ export async function getAdminOrders(input: {
   }
 }
 
+const VALID_ORDER_STATUSES = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"] as const
+type OrderStatus = (typeof VALID_ORDER_STATUSES)[number]
+
 export async function updateOrderStatus(orderId: string, orderStatus: string) {
   await requireAdmin()
 
-  const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]
-  if (!validStatuses.includes(orderStatus)) {
+  if (!VALID_ORDER_STATUSES.includes(orderStatus as OrderStatus)) {
     throw new Error(`Invalid order status: ${orderStatus}`)
   }
 
   await prisma.order.update({
     where: { id: orderId },
-    data: { orderStatus: orderStatus as any },
+    data: { orderStatus: orderStatus as OrderStatus },
   })
 
   revalidatePath("/admin/orders")

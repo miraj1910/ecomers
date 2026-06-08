@@ -1,7 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useSyncExternalStore } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { X } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -17,11 +16,7 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const { data: session } = useSession()
   const isAuth = !!session?.user?.id
