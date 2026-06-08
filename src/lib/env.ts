@@ -2,13 +2,18 @@ import { z } from "zod"
 
 const serverSchema = z.object({
   DATABASE_URL: z.string().url().min(1, "DATABASE_URL is required"),
-  NEXTAUTH_SECRET: z.string().min(32, "NEXTAUTH_SECRET must be at least 32 characters"),
+  NEXTAUTH_SECRET: z.string().min(32, "NEXTAUTH_SECRET must be at least 32 characters").optional(),
+  AUTH_SECRET: z.string().min(32, "AUTH_SECRET must be at least 32 characters").optional(),
   NEXTAUTH_URL: z.string().url().optional(),
+  AUTH_URL: z.string().url().optional(),
   GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
   GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
   STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required"),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
-})
+}).refine(
+  (data) => data.AUTH_SECRET || data.NEXTAUTH_SECRET,
+  { message: "Either AUTH_SECRET or NEXTAUTH_SECRET is required" }
+)
 
 const clientSchema = z.object({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1, "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required"),
