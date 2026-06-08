@@ -11,7 +11,8 @@ export default async function AdminOrders({
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
   const session = await auth()
-  if (!session?.user || session.user.role !== "ADMIN") redirect("/")
+  if (!session?.user) redirect("/sign-in")
+  if (session.user.role !== "ADMIN") redirect("/sign-in")
 
   const params = await searchParams
   let data: Awaited<ReturnType<typeof getAdminOrders>> | null = null

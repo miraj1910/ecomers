@@ -11,7 +11,8 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>
 }) {
   const session = await auth()
-  if (!session?.user || session.user.role !== "ADMIN") redirect("/")
+  if (!session?.user) redirect("/sign-in")
+  if (session.user.role !== "ADMIN") redirect("/sign-in")
 
   const { id } = await params
 

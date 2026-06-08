@@ -60,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { status: true, deletedAt: true },
+          select: { status: true, deletedAt: true, role: true },
         })
         if (dbUser?.deletedAt) {
           debug("signIn: user deleted, denying", user.email)
@@ -70,7 +70,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           debug("signIn: user blocked, denying", user.email)
           return false
         }
-        debug("signIn: user authorized", user.email)
+        debug("signIn: user authorized", { email: user.email, role: dbUser?.role })
         return true
       } catch (e) {
         console.error("[auth/signIn] Database error in signIn callback:", e)
@@ -78,10 +78,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     },
     async session({ session, user }) {
-      if (user) {
+      if (user?.id) {
         session.user.id = user.id
-        const role = "role" in user ? (user as { role: "CUSTOMER" | "ADMIN" }).role : undefined
-        session.user.role = role ?? "CUSTOMER"
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+          })
+          session.user.role = dbUser?.role ?? "CUSTOMER"
+          debug("session callback: role from direct DB query", { id: user.id, role: session.user.role })
+        } catch (e) {
+          console.error("[auth/session] DB query failed, defaulting to CUSTOMER:", e)
+          session.user.role = "CUSTOMER"
+        }
+      } else {
+        debug("session callback: no user object, defaulting role")
+        session.user.role = "CUSTOMER"
       }
       return session
     },
