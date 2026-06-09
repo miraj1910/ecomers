@@ -102,14 +102,23 @@ export function AdminProductsTable({ initialData }: { initialData: PageData }) {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      await fetch(`/api/admin/products/${id}`, { method: "DELETE" })
-      setDeleteDialog(null)
-      const params: Record<string, string> = { page: String(data.page) }
-      if (search) params.search = search
-      if (categoryFilter !== "ALL") params.category = categoryFilter
-      if (statusFilter !== "ALL") params.status = statusFilter
-      fetchData(params)
-      router.refresh()
+      try {
+        const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          console.error("Failed to delete product:", err.error || res.statusText)
+          return
+        }
+        setDeleteDialog(null)
+        const params: Record<string, string> = { page: String(data.page) }
+        if (search) params.search = search
+        if (categoryFilter !== "ALL") params.category = categoryFilter
+        if (statusFilter !== "ALL") params.status = statusFilter
+        fetchData(params)
+        router.refresh()
+      } catch (error) {
+        console.error("Failed to delete product:", error)
+      }
     },
     [search, categoryFilter, statusFilter, data.page, fetchData, router]
   )
@@ -154,12 +163,18 @@ export function AdminProductsTable({ initialData }: { initialData: PageData }) {
         sortingFn: "basic",
         cell: ({ row }) => (
           <div className="space-y-0.5">
-            <span className="font-medium text-foreground">
-              {formatPrice(row.original.price)}
-            </span>
-            {row.original.discountPrice && (
-              <span className="ml-2 text-xs text-sale line-through">
-                {formatPrice(row.original.discountPrice)}
+            {row.original.discountPrice ? (
+              <>
+                <span className="font-medium text-sale">
+                  {formatPrice(row.original.discountPrice)}
+                </span>
+                <span className="ml-2 text-xs text-secondary line-through">
+                  {formatPrice(row.original.price)}
+                </span>
+              </>
+            ) : (
+              <span className="font-medium text-foreground">
+                {formatPrice(row.original.price)}
               </span>
             )}
           </div>

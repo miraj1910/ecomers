@@ -1,6 +1,8 @@
 import { handlers } from "@/lib/auth"
 import type { NextRequest } from "next/server"
 
+export const runtime = "nodejs"
+
 async function loggedHandler(
   req: NextRequest,
   method: "GET" | "POST"

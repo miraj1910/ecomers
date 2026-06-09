@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 export const siteConfig = {
   name: "STORE",
   description: "Curated modern essentials for the minimalist lifestyle. Premium quality pieces designed to last.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ogImage: "/opengraph-image",
   locale: "en_US",
   twitterHandle: "@store",

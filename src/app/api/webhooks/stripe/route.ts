@@ -40,28 +40,6 @@ export async function POST(req: Request) {
   const stripeSession = event.data.object as Stripe.Checkout.Session
 
   try {
-    const existingOrder = await prisma.order.findUnique({
-      where: { stripeSessionId: stripeSession.id },
-    })
-
-    if (existingOrder) {
-      return NextResponse.json({ received: true, status: "duplicate" })
-    }
-
-    const paymentIntentId =
-      typeof stripeSession.payment_intent === "string"
-        ? stripeSession.payment_intent
-        : stripeSession.payment_intent?.id ?? null
-
-    if (paymentIntentId) {
-      const existingByIntent = await prisma.order.findUnique({
-        where: { paymentIntentId },
-      })
-      if (existingByIntent) {
-        return NextResponse.json({ received: true, status: "duplicate" })
-      }
-    }
-
     const userId =
       stripeSession.client_reference_id ?? stripeSession.metadata?.userId
     if (!userId) {
@@ -70,20 +48,6 @@ export async function POST(req: Request) {
         stripeSession.id
       )
       return NextResponse.json({ error: "Missing user ID" }, { status: 400 })
-    }
-
-    const userExists = await prisma.user.findUnique({ where: { id: userId } })
-    if (!userExists) {
-      await prisma.user.create({
-        data: {
-          id: userId,
-          name: `Guest ${stripeSession.id.slice(0, 8)}`,
-          email: null,
-          role: "CUSTOMER",
-        },
-      }).catch(() => {
-        // Race condition: duplicate webhook delivery may have created this guest
-      })
     }
 
     let cartItems: {
@@ -105,13 +69,24 @@ export async function POST(req: Request) {
       const lineItems = await getStripe().checkout.sessions.listLineItems(
         stripeSession.id
       )
-      cartItems = lineItems.data.map((item) => ({
-        productId: item.description ?? "unknown",
-        name: item.description ?? "Unknown",
-        price: (item.amount_total ?? 0) / 100 / (item.quantity ?? 1),
-        quantity: item.quantity ?? 1,
-        image: undefined,
-      }))
+      const productNames = lineItems.data.map((item) => item.description ?? "")
+      const dbProducts = await prisma.product.findMany({
+        where: { name: { in: productNames } },
+        select: { id: true, name: true, slug: true, price: true, images: true },
+      })
+      const productByName = new Map(dbProducts.map((p) => [p.name, p]))
+      cartItems = lineItems.data.map((item) => {
+        const product = productByName.get(item.description ?? "")
+        return {
+          productId: product?.id ?? "unknown",
+          name: item.description ?? "Unknown",
+          price: product
+            ? Number(product.price)
+            : (item.amount_total ?? 0) / 100 / (item.quantity ?? 1),
+          quantity: item.quantity ?? 1,
+          image: product?.images?.[0],
+        }
+      })
     }
 
     const totalAmount =
@@ -120,6 +95,39 @@ export async function POST(req: Request) {
         : cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
     await prisma.$transaction(async (tx) => {
+      const existingOrder = await tx.order.findUnique({
+        where: { stripeSessionId: stripeSession.id },
+      })
+      if (existingOrder) {
+        throw new Error("DUPLICATE_SESSION")
+      }
+
+      const paymentIntentId =
+        typeof stripeSession.payment_intent === "string"
+          ? stripeSession.payment_intent
+          : stripeSession.payment_intent?.id ?? null
+
+      if (paymentIntentId) {
+        const existingByIntent = await tx.order.findUnique({
+          where: { paymentIntentId },
+        })
+        if (existingByIntent) {
+          throw new Error("DUPLICATE_INTENT")
+        }
+      }
+
+      const userExists = await tx.user.findUnique({ where: { id: userId } })
+      if (!userExists) {
+        await tx.user.create({
+          data: {
+            id: userId,
+            name: `Guest ${stripeSession.id.slice(0, 8)}`,
+            email: null,
+            role: "CUSTOMER",
+          },
+        })
+      }
+
       const order = await tx.order.create({
         data: {
           userId,
@@ -179,6 +187,11 @@ export async function POST(req: Request) {
           },
         })
       }
+    }).catch((error) => {
+      if (error instanceof Error && error.message.startsWith("DUPLICATE")) {
+        return
+      }
+      throw error
     })
 
     revalidatePath("/orders")

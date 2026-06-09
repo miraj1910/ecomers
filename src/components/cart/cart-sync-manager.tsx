@@ -13,6 +13,7 @@ import {
 import {
   useWishlist,
   fetchServerWishlist,
+  mergeServerWishlist,
   loadGuestWishlist,
   saveGuestWishlist,
   clearGuestWishlist,
@@ -44,34 +45,23 @@ export function CartSyncManager() {
 
       const doFetch = () => {
         fetchServerCart().catch(() => {})
-        fetchServerWishlist().then((productIds) => {
-          setWishlistItems(
-            productIds.map((id) => ({
-              productId: id,
-              name: "",
-              slug: "",
-              price: 0,
-              image: "",
-            }))
-          )
+        fetchServerWishlist().then((serverItems) => {
+          setWishlistItems(serverItems)
         }).catch(() => {})
       }
 
       if (guestCart.length > 0 && !mergeAttempted.current) {
         mergeAttempted.current = true
-        mergeServerCart(guestCart).then(() => {
+        const guestWishlist = loadGuestWishlist()
+        const guestWishlistIds = guestWishlist.map((i) => i.productId)
+        Promise.all([
+          mergeServerCart(guestCart),
+          guestWishlistIds.length > 0 ? mergeServerWishlist(guestWishlistIds) : Promise.resolve(true),
+        ]).then(() => {
           clearGuestCart()
           clearGuestWishlist()
-          fetchServerWishlist().then((productIds) => {
-            setWishlistItems(
-              productIds.map((id) => ({
-                productId: id,
-                name: "",
-                slug: "",
-                price: 0,
-                image: "",
-              }))
-            )
+          fetchServerWishlist().then((serverItems) => {
+            setWishlistItems(serverItems)
           }).catch(() => {})
         }).catch(() => {
           doFetch()

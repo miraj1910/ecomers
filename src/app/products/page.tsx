@@ -75,7 +75,16 @@ export default async function ProductsPage({ searchParams }: Props) {
     console.error("Failed to load products from database:", error)
   }
 
-  const products = [...sanityOrMdxProducts, ...dbProducts]
+  const productMap = new Map<string, SanityProduct>()
+  for (const p of sanityOrMdxProducts) {
+    productMap.set(p.slug, p)
+  }
+  for (const p of dbProducts) {
+    if (!productMap.has(p.slug)) {
+      productMap.set(p.slug, p)
+    }
+  }
+  const products = Array.from(productMap.values())
 
   let categoryList: { title: string; slug: string; image?: string }[]
 
@@ -123,6 +132,7 @@ export default async function ProductsPage({ searchParams }: Props) {
     filtered = filtered.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
         p.tags?.some((t) => t.toLowerCase().includes(q))
     )
   }

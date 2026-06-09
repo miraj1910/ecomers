@@ -25,6 +25,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const updateQuantity = useCart((s) => s.updateQuantity)
   const itemCount = useCart((s) => s.itemCount())
   const subtotal = useCart((s) => s.subtotal())
+  const error = useCart((s) => s.error)
 
   const handleRemove = useCallback(async (productId: string) => {
     if (isAuth) {
@@ -107,6 +108,12 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                 <X className="h-4 w-4" />
               </Button>
             </div>
+
+            {error && (
+              <div className="mx-4 mt-2 rounded-xl border border-red-400/20 bg-red-400/12 px-4 py-2 text-xs text-red-300">
+                {error}
+              </div>
+            )}
 
             {items.length === 0 ? (
               <EmptyCartState onContinueShopping={onClose} />

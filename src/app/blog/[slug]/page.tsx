@@ -84,7 +84,7 @@ export default async function BlogPostPage({ params }: Props) {
           alt={post.frontmatter.title}
           fill
           className="object-cover"
-          preload
+          priority
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />

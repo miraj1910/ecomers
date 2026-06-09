@@ -50,9 +50,8 @@ export async function PUT(
   } catch (error) {
     console.error(`[PUT /api/admin/products/${id}] Error:`, error)
     const message = error instanceof Error ? error.message : "Failed to update product"
-    const details = error instanceof Error ? error.stack : undefined
     return NextResponse.json(
-      { success: false, error: message, details },
+      { success: false, error: message },
       { status: 400 }
     )
   }

@@ -68,25 +68,62 @@ export async function POST(request: Request) {
   const parsed = validateBody(body, addItemSchema)
   if (parsed.error) return parsed.error
 
-  const cart = await getOrCreateCart(session.user.id)
-  const { productId, name, price, quantity, image, size, color } = parsed.data
+  const { productId, quantity, image, size, color } = parsed.data
 
-  const existing = cart.items.find((i) => i.productId === productId)
-  if (existing) {
-    await prisma.cartItem.update({
-      where: { cartId_productId: { cartId: cart.id, productId } },
-      data: { quantity: existing.quantity + quantity },
-    })
-  } else {
-    await prisma.cartItem.create({
-      data: { cartId: cart.id, productId, name, price, quantity, image, size, color },
-    })
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { id: true, name: true, price: true, images: true },
+  })
+  if (!product) {
+    return NextResponse.json({ error: "Product not found" }, { status: 404 })
   }
 
-  const updatedCart = await getOrCreateCart(session.user.id)
+  const safeName = product.name
+  const safePrice = Number(product.price)
+  const safeImage = image || product.images?.[0] || ""
+
+  const updatedCart = await prisma.$transaction(async (tx) => {
+    let cart = await tx.cart.findUnique({
+      where: { userId: session.user!.id },
+      include: { items: true },
+    })
+    if (!cart) {
+      cart = await tx.cart.create({
+        data: { userId: session.user!.id },
+        include: { items: true },
+      })
+    }
+
+    const existing = cart.items.find((i) => i.productId === productId)
+
+    if (existing) {
+      await tx.cartItem.update({
+        where: { cartId_productId: { cartId: cart.id, productId } },
+        data: { quantity: existing.quantity + quantity },
+      })
+    } else {
+      await tx.cartItem.create({
+        data: {
+          cartId: cart.id,
+          productId,
+          name: safeName,
+          price: safePrice,
+          quantity,
+          image: safeImage,
+          size,
+          color,
+        },
+      })
+    }
+
+    return tx.cart.findUnique({
+      where: { userId: session.user!.id },
+      include: { items: true },
+    })
+  })
 
   return NextResponse.json({
-    items: updatedCart.items.map((i) => ({
+    items: (updatedCart?.items ?? []).map((i) => ({
       productId: i.productId,
       name: i.name,
       price: i.price,

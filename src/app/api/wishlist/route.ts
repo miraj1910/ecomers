@@ -25,11 +25,26 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   })
 
+  const productIds = items.map((i) => i.productId)
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: { id: true, name: true, slug: true, price: true, discountPrice: true, images: true },
+  })
+  const productMap = new Map(products.map((p) => [p.id, p]))
+
   return NextResponse.json({
-    items: items.map((i) => ({
-      productId: i.productId,
-      createdAt: i.createdAt.toISOString(),
-    })),
+    items: items.map((i) => {
+      const product = productMap.get(i.productId)
+      return {
+        productId: i.productId,
+        name: product?.name ?? "",
+        slug: product?.slug ?? "",
+        price: product ? Number(product.price) : 0,
+        comparePrice: product?.discountPrice ? Number(product.discountPrice) : undefined,
+        image: product?.images?.[0] ?? "",
+        createdAt: i.createdAt.toISOString(),
+      }
+    }),
   })
 }
 

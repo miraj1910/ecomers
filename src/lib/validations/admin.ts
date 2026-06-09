@@ -22,7 +22,7 @@ export const updateProductStockSchema = z.object({
 
 export const updateInventorySchema = z.object({
   productId: id,
-  stock: z.number().int().min(0, "Stock cannot be negative"),
+  stock: z.number().int().min(0, "Stock cannot be negative").optional(),
   sku: z.string().max(100).optional(),
   lowStockThreshold: z.number().int().min(0, "Threshold cannot be negative").optional(),
 })

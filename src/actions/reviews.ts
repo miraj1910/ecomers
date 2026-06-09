@@ -70,7 +70,13 @@ export async function createReview(
     })
 
     await updateProductRating(parsed.data.productId)
-    revalidatePath(`/products/${parsed.data.productId}`)
+    const reviewedProduct = await prisma.product.findUnique({
+      where: { id: parsed.data.productId },
+      select: { slug: true },
+    })
+    if (reviewedProduct) {
+      revalidatePath(`/products/${reviewedProduct.slug}`)
+    }
 
     return { success: true, data: review as ReviewItem }
   } catch (error) {
@@ -110,7 +116,13 @@ export async function updateReview(
     })
 
     await updateProductRating(review.productId)
-    revalidatePath(`/products/${review.productId}`)
+    const updatedProduct = await prisma.product.findUnique({
+      where: { id: review.productId },
+      select: { slug: true },
+    })
+    if (updatedProduct) {
+      revalidatePath(`/products/${updatedProduct.slug}`)
+    }
 
     return { success: true, data: review as ReviewItem }
   } catch (error) {
@@ -130,7 +142,13 @@ export async function deleteReview(reviewId: string): Promise<ServerActionResult
 
     await prisma.review.delete({ where: { id: reviewId } })
     await updateProductRating(existing.productId)
-    revalidatePath(`/products/${existing.productId}`)
+    const deletedProduct = await prisma.product.findUnique({
+      where: { id: existing.productId },
+      select: { slug: true },
+    })
+    if (deletedProduct) {
+      revalidatePath(`/products/${deletedProduct.slug}`)
+    }
 
     return { success: true }
   } catch (error) {

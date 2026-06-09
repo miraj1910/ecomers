@@ -132,8 +132,9 @@ export async function fetchServerCart(): Promise<void> {
         color: i.color,
       }))
     )
-  } catch {
-    useCart.getState().setLoading(false)
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Failed to load cart"
+    useCart.getState().setError(msg)
   }
 }
 

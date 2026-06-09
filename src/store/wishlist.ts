@@ -56,10 +56,10 @@ async function apiCall<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json()
 }
 
-export async function fetchServerWishlist(): Promise<string[]> {
+export async function fetchServerWishlist(): Promise<WishlistItem[]> {
   try {
-    const data = await apiCall<{ items: { productId: string }[] }>("/api/wishlist")
-    return data.items.map((i) => i.productId)
+    const data = await apiCall<{ items: WishlistItem[] }>("/api/wishlist")
+    return data.items
   } catch {
     return []
   }
@@ -70,6 +70,18 @@ export async function addToServerWishlist(productId: string): Promise<boolean> {
     await apiCall<{ success: boolean }>("/api/wishlist", {
       method: "POST",
       body: JSON.stringify({ productId }),
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function mergeServerWishlist(productIds: string[]): Promise<boolean> {
+  try {
+    await apiCall<{ success: boolean }>("/api/wishlist/merge", {
+      method: "POST",
+      body: JSON.stringify({ productIds }),
     })
     return true
   } catch {

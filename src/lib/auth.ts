@@ -74,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true
       } catch (e) {
         console.error("[auth/signIn] Database error in signIn callback:", e)
-        return true
+        return false
       }
     },
     async session({ session, user }) {
@@ -85,11 +85,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { id: user.id },
             select: { role: true },
           })
-          session.user.role = dbUser?.role ?? "CUSTOMER"
+          if (dbUser) {
+            session.user.role = dbUser.role
+          }
           debug("session callback: role from direct DB query", { id: user.id, role: session.user.role })
         } catch (e) {
-          console.error("[auth/session] DB query failed, defaulting to CUSTOMER:", e)
-          session.user.role = "CUSTOMER"
+          console.error("[auth/session] DB query failed, preserving existing role:", e)
         }
       } else {
         debug("session callback: no user object, defaulting role")

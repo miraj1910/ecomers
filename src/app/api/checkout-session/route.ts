@@ -60,6 +60,23 @@ export async function POST(request: Request) {
       )
     }
 
+    await prisma.$transaction(
+      items.map((item) =>
+        prisma.productInventory.upsert({
+          where: { productId: item.productId },
+          create: {
+            productId: item.productId,
+            sku: item.productId,
+            stock: 0,
+            reservedStock: item.quantity,
+          },
+          update: {
+            reservedStock: { increment: item.quantity },
+          },
+        })
+      )
+    )
+
     const stripe = getStripe()
 
     const metadata: Record<string, string> = {
@@ -85,6 +102,7 @@ export async function POST(request: Request) {
           product_data: {
             name: item.name,
             images: item.image ? [item.image] : [],
+            metadata: { productId: item.productId },
           },
           unit_amount: Math.round(item.price * 100),
         },

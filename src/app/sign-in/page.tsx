@@ -2,19 +2,22 @@
 
 import { signIn } from "next-auth/react"
 import { Container } from "@/components/layout/container"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const callbackUrl = useMemo(() => searchParams.get("callbackUrl") || "/", [searchParams])
 
   async function handleGoogleSignIn() {
     setError(null)
     setLoading(true)
 
     try {
-      await signIn("google", { callbackUrl: "/" })
+      await signIn("google", { callbackUrl })
     } catch {
       setError("Failed to sign in with Google. Please try again.")
       setLoading(false)

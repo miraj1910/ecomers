@@ -113,11 +113,19 @@ export function AdminOrdersClient({ initialData }: { initialData: PageData }) {
   const handleStatusChange = useCallback(
     async (orderId: string, newStatus: string) => {
       setUpdating(orderId)
-      await fetch("/api/admin/orders", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, orderStatus: newStatus }),
-      })
+      try {
+        const res = await fetch("/api/admin/orders", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, orderStatus: newStatus }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          console.error("Failed to update order:", err.error || res.statusText)
+        }
+      } catch (error) {
+        console.error("Failed to update order:", error)
+      }
       setUpdating(null)
       setStatusModal(null)
       fetchPage(data.page, statusFilter, search)

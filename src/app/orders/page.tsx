@@ -84,7 +84,7 @@ export default async function OrdersPage() {
                 <Link
                   key={order.id}
                   href={`/orders/${order.id}`}
-                  className="rounded-2xl border border-border bg-surface block rounded-2xl p-5 transition-colors hover:bg-white/[0.07]"
+                  className="rounded-2xl border border-border bg-surface block p-5 transition-colors hover:bg-white/[0.07]"
                 >
                   <div className="flex items-start justify-between">
                     <div>

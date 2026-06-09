@@ -38,7 +38,7 @@ export default async function ProfilePage() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-2xl border border-border bg-surface rounded-2xl p-6">
+            <div className="rounded-2xl border border-border bg-surface p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <User className="h-4 w-4 text-accent" />
                 Account Information
@@ -80,7 +80,7 @@ export default async function ProfilePage() {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface rounded-2xl p-6">
+            <div className="rounded-2xl border border-border bg-surface p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Shield className="h-4 w-4 text-accent" />
                 Account Security

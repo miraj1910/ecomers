@@ -42,6 +42,13 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "userId is required" }, { status: 400 })
   }
 
+  if (userId === session.user.id) {
+    return NextResponse.json(
+      { error: "Cannot perform admin actions on yourself" },
+      { status: 403 }
+    )
+  }
+
   try {
     if (action === "role") {
       if (!["CUSTOMER", "ADMIN"].includes(value)) {

@@ -25,16 +25,8 @@ export default function WishlistPage() {
     if (fetchedRef.current) return
     fetchedRef.current = true
 
-    fetchServerWishlist().then((productIds) => {
-      setItems(
-        productIds.map((id) => ({
-          productId: id,
-          name: "",
-          slug: "",
-          price: 0,
-          image: "",
-        }))
-      )
+    fetchServerWishlist().then((serverItems) => {
+      setItems(serverItems)
     })
   }, [status, setItems])
 
@@ -94,7 +86,7 @@ export default function WishlistPage() {
             {displayItems.map((item) => (
               <div
                 key={item.productId}
-                className="rounded-2xl border border-border bg-surface group relative overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1.5"
+                className="rounded-2xl border border-border bg-surface group relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5"
               >
                 <Link href={`/products/${item.slug}`}>
                   <div className="relative aspect-[4/5] overflow-hidden bg-muted">

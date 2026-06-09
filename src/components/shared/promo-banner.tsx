@@ -34,7 +34,7 @@ export function PromoBanner() {
                   Start Shopping
                 </Button>
               </Link>
-              <Link href="/sale">
+              <Link href="/products?sort=price-asc">
                 <Button
                   variant="link"
                   size="lg"

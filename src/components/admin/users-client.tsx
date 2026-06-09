@@ -69,11 +69,19 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
   const handleAction = useCallback(
     async (userId: string, action: string, value: string) => {
       setUpdating(userId)
-      await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action, value }),
-      })
+      try {
+        const res = await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, action, value }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          console.error("Failed to update user:", err.error || res.statusText)
+        }
+      } catch (error) {
+        console.error("Failed to update user:", error)
+      }
       setUpdating(null)
       fetchPage(data.page, search)
       router.refresh()
@@ -84,13 +92,22 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
   const handleDelete = useCallback(
     async (userId: string) => {
       setUpdating(userId)
-      await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action: "delete" }),
-      })
+      try {
+        const res = await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, action: "delete" }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          console.error("Failed to delete user:", err.error || res.statusText)
+          return
+        }
+        setDeleteDialog(null)
+      } catch (error) {
+        console.error("Failed to delete user:", error)
+      }
       setUpdating(null)
-      setDeleteDialog(null)
       fetchPage(data.page, search)
       router.refresh()
     },

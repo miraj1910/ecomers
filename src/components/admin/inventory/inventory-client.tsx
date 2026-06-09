@@ -171,11 +171,15 @@ export function InventoryClient({
 
   const handleUpdateStock = useCallback(
     async (productId: string, stock: number) => {
-      await fetch("/api/admin/inventory", {
+      const res = await fetch("/api/admin/inventory", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, stock }),
       })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to update stock")
+      }
       fetchPage(data.page, search)
       router.refresh()
     },
@@ -184,11 +188,15 @@ export function InventoryClient({
 
   const handleUpdateThreshold = useCallback(
     async (productId: string, lowStockThreshold: number) => {
-      await fetch("/api/admin/inventory", {
+      const res = await fetch("/api/admin/inventory", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, lowStockThreshold }),
       })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to update threshold")
+      }
       fetchPage(data.page, search)
       router.refresh()
     },
@@ -197,11 +205,15 @@ export function InventoryClient({
 
   const handleUpdateSku = useCallback(
     async (productId: string, sku: string) => {
-      await fetch("/api/admin/inventory", {
+      const res = await fetch("/api/admin/inventory", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, sku }),
       })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to update SKU")
+      }
       fetchPage(data.page, search)
       router.refresh()
     },
