@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
 import { getAdminUsers } from "@/lib/actions/admin"
 import { AdminUsersClient } from "@/components/admin/users-client"
 
@@ -10,10 +8,6 @@ export default async function AdminUsers({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
-  const session = await auth()
-  if (!session?.user) redirect("/sign-in")
-  if (session.user.role !== "ADMIN") redirect("/sign-in")
-
   const params = await searchParams
   let data: Awaited<ReturnType<typeof getAdminUsers>> | null = null
   try {

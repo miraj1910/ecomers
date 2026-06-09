@@ -60,22 +60,47 @@ export async function POST(request: Request) {
       )
     }
 
-    await prisma.$transaction(
-      items.map((item) =>
-        prisma.productInventory.upsert({
+    const productStocks = new Map<string, { stock: number; sku: string }>()
+    for (const item of items) {
+      let existingInventory = await prisma.productInventory.findUnique({
+        where: { productId: item.productId },
+      })
+
+      if (existingInventory) {
+        await prisma.productInventory.update({
           where: { productId: item.productId },
-          create: {
-            productId: item.productId,
-            sku: item.productId,
-            stock: 0,
-            reservedStock: item.quantity,
-          },
-          update: {
-            reservedStock: { increment: item.quantity },
-          },
+          data: { reservedStock: { increment: item.quantity } },
         })
-      )
-    )
+      } else {
+        if (!productStocks.has(item.productId)) {
+          const product = await prisma.product.findUnique({
+            where: { id: item.productId },
+            select: { stock: true, sku: true },
+          })
+          productStocks.set(item.productId, {
+            stock: product?.stock ?? 0,
+            sku: product?.sku ?? item.productId,
+          })
+        }
+        const ps = productStocks.get(item.productId)!
+        await prisma.productInventory.create({
+          data: {
+            productId: item.productId,
+            sku: ps.sku,
+            stock: ps.stock,
+            reservedStock: item.quantity,
+            lowStockThreshold: 5,
+          },
+        }).catch(() => {
+          // Race condition: another request created the record first
+          // Just increment reservedStock on the existing record
+          return prisma.productInventory.update({
+            where: { productId: item.productId },
+            data: { reservedStock: { increment: item.quantity } },
+          })
+        })
+      }
+    }
 
     const stripe = getStripe()
 

@@ -1,6 +1,4 @@
 import { DollarSign, ShoppingBag, Users, Package, AlertTriangle } from "lucide-react"
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 import { getDashboardStats } from "@/actions/admin"
 import { RevenueChart } from "@/components/admin/dashboard/revenue-chart"
 import { TopProductsChart } from "@/components/admin/dashboard/top-products-chart"
@@ -11,10 +9,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 export const dynamic = "force-dynamic"
 
 export default async function AdminDashboard() {
-  const session = await auth()
-  if (!session?.user) redirect("/sign-in")
-  if (session.user.role !== "ADMIN") redirect("/sign-in")
-
   let stats: Awaited<ReturnType<typeof getDashboardStats>> | null = null
   try {
     stats = await getDashboardStats()

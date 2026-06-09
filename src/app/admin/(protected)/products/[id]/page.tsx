@@ -1,5 +1,4 @@
-import { redirect, notFound } from "next/navigation"
-import { auth } from "@/lib/auth"
+import { notFound } from "next/navigation"
 import { getAdminProduct } from "@/lib/actions/admin"
 import { ProductForm } from "@/components/admin/product-form"
 
@@ -10,10 +9,6 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await auth()
-  if (!session?.user) redirect("/sign-in")
-  if (session.user.role !== "ADMIN") redirect("/sign-in")
-
   const { id } = await params
 
   let product: Awaited<ReturnType<typeof getAdminProduct>> | undefined

@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
 import { getInventoryPage } from "@/actions/inventory"
 import { InventoryClient } from "@/components/admin/inventory/inventory-client"
 
@@ -10,10 +8,6 @@ export default async function AdminInventory({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
-  const session = await auth()
-  if (!session?.user) redirect("/sign-in")
-  if (session.user.role !== "ADMIN") redirect("/sign-in")
-
   const params = await searchParams
   const page = params.page ? Number(params.page) : 1
   const search = params.search
