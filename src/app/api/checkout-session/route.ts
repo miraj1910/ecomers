@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     const productStocks = new Map<string, { stock: number; sku: string }>()
     for (const item of items) {
-      let existingInventory = await prisma.productInventory.findUnique({
+      const existingInventory = await prisma.productInventory.findUnique({
         where: { productId: item.productId },
       })
 
