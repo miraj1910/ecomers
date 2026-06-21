@@ -15,6 +15,10 @@ const csp = [
 ].join("; ")
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXTAUTH_URL: "https://ecomers-seven.vercel.app",
+    AUTH_URL: "https://ecomers-seven.vercel.app",
+  },
   images: {
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
