@@ -1,29 +1,21 @@
 "use client"
 
+import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
-import { signOut, useSession } from "next-auth/react"
-import Image from "next/image"
-import {
-  User,
-  Heart,
-  Package,
-  LogOut,
-} from "lucide-react"
 import { useState, useRef, useEffect } from "react"
+import { User, LogOut, Package, Heart, Settings } from "lucide-react"
 
-const links = [
-  { href: "/profile", label: "Profile", icon: User },
-  { href: "/wishlist", label: "Wishlist", icon: Heart },
-  { href: "/orders", label: "Orders", icon: Package },
-]
+interface UserMenuProps {
+  light?: boolean
+}
 
-export function UserMenu() {
+export function UserMenu({ light }: UserMenuProps) {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false)
       }
@@ -32,73 +24,70 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const user = session?.user
-  if (!user) return null
+  if (!session?.user) return null
 
-  const name = user.name ?? "User"
-  const email = user.email ?? ""
-  const image = user.image
-
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+  const initials = session.user.name
+    ? session.user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U"
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-accent/15 text-sm font-medium text-accent transition-colors hover:bg-accent/25"
+        className="flex h-10 w-10 items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
         aria-label="User menu"
-        aria-expanded={open}
       >
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            width={32}
-            height={32}
-            unoptimized
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : (
-          initials
-        )}
+        <div className="h-8 w-8 flex items-center justify-center bg-border-subtle text-text-primary text-xs font-medium">
+          {initials}
+        </div>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-border bg-background/95 backdrop-blur-2xl p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.32)]">
-          <div className="border-b border-border px-3 py-2">
-            <p className="text-sm font-medium truncate text-foreground">{name}</p>
-            <p className="text-xs text-secondary truncate">{email}</p>
+        <div className="absolute right-0 top-12 w-56 bg-white border border-border-subtle shadow-sm z-50">
+          <div className="px-5 py-4 border-b border-border-subtle">
+            <p className="text-sm font-medium text-text-primary truncate">{session.user.name}</p>
+            <p className="text-xs text-text-secondary truncate">{session.user.email}</p>
           </div>
 
-          <div className="py-1">
-            {links.map((link) => {
-              const Icon = link.icon
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-secondary transition-colors hover:bg-foreground/[0.07] hover:text-foreground"
-                >
-                  <Icon className="h-4 w-4" />
-                  {link.label}
-                </Link>
-              )
-            })}
+          <div className="py-2">
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-5 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-warm transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+              Profile
+            </Link>
+            <Link
+              href="/orders"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-5 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-warm transition-colors"
+            >
+              <Package className="h-4 w-4" />
+              Orders
+            </Link>
+            <Link
+              href="/wishlist"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-5 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-warm transition-colors"
+            >
+              <Heart className="h-4 w-4" />
+              Wishlist
+            </Link>
           </div>
 
-          <div className="border-t border-border pt-1">
+          <div className="border-t border-border-subtle py-2">
             <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-secondary transition-colors hover:bg-foreground/[0.07] hover:text-foreground"
+              onClick={() => signOut()}
+              className="flex w-full items-center gap-3 px-5 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-warm transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              Sign Out
             </button>
           </div>
         </div>

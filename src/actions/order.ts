@@ -1,9 +1,10 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { createOrderSchema } from "@/lib/validations/order"
+import { CACHE_TAGS } from "@/lib/cache"
 import type { OrderWithItems, ServerActionResult } from "@/types/prisma"
 
 export async function createOrder(input: unknown): Promise<ServerActionResult<OrderWithItems>> {
@@ -22,6 +23,11 @@ export async function createOrder(input: unknown): Promise<ServerActionResult<Or
         stripeSessionId: parsed.data.stripeSessionId ?? null,
         paymentIntentId: parsed.data.paymentIntentId ?? null,
         totalAmount: parsed.data.totalAmount,
+        shippingName: parsed.data.shippingName ?? "",
+        shippingStreet: parsed.data.shippingStreet ?? "",
+        shippingCity: parsed.data.shippingCity ?? "",
+        shippingState: parsed.data.shippingState ?? "",
+        shippingPostal: parsed.data.shippingPostal ?? "",
         items: {
           create: parsed.data.items.map((item) => ({
             productId: item.productId,
@@ -37,6 +43,8 @@ export async function createOrder(input: unknown): Promise<ServerActionResult<Or
     })
 
     revalidatePath("/orders")
+    revalidateTag(CACHE_TAGS.orders, 'max')
+    revalidateTag(CACHE_TAGS.inventory, 'max')
 
     return {
       success: true,

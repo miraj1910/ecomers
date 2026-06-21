@@ -1,7 +1,6 @@
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { StarRating } from "@/components/reviews/star-rating"
-import { formatPrice } from "@/lib/utils"
+import { Star } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface ProductInfoProps {
   name: string
@@ -26,73 +25,86 @@ export function ProductInfo({
 }: ProductInfoProps) {
   const inStock = (stock ?? 0) > 0
 
+  const discount = comparePrice && comparePrice > price
+    ? Math.round(((comparePrice - price) / comparePrice) * 100)
+    : null
+
   return (
     <div>
       {category && (
         <Link
           href={`/products?category=${category.slug}`}
-          className="text-xs text-secondary hover:text-foreground transition-colors uppercase tracking-wider"
+          className="meta hover:text-text-primary transition-colors"
         >
           {category.title}
         </Link>
       )}
 
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+      <h1 className="mt-4 heading-hero text-text-primary">
         {name}
       </h1>
 
       {description && (
-        <p className="mt-4 text-sm text-secondary leading-relaxed">
+        <p className="mt-6 text-base leading-relaxed text-text-secondary max-w-lg">
           {description}
         </p>
       )}
 
-      <div className="mt-6 flex items-baseline gap-3">
-        <span className="text-2xl font-semibold">
-          {formatPrice(price, { notation: "standard" })}
+      <div className="mt-8 flex items-baseline gap-4">
+        <span className="text-3xl font-serif text-text-primary">
+          ${price.toFixed(0)}
         </span>
         {comparePrice && comparePrice > price && (
           <>
-            <span className="text-lg text-secondary line-through">
-              {formatPrice(comparePrice, { notation: "standard" })}
+            <span className="text-xl text-text-muted line-through">
+              ${comparePrice.toFixed(0)}
             </span>
-            <Badge variant="destructive" size="sm">
-              {Math.round(((comparePrice - price) / comparePrice) * 100)}% OFF
-            </Badge>
+            <span className="text-[0.6rem] font-medium tracking-[0.1em] uppercase text-text-primary bg-text-primary/5 px-2.5 py-1">
+              {discount}% off
+            </span>
           </>
         )}
       </div>
 
       {rating && rating.totalRatings > 0 && (
-        <div className="mt-4 flex items-center gap-2">
-          <StarRating rating={Math.round(rating.averageRating)} size="sm" />
-          <span className="text-xs text-secondary">
+        <div className="mt-6 flex items-center gap-2">
+          <div className="flex items-center gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={cn(
+                  "h-3.5 w-3.5",
+                  i < Math.round(rating.averageRating)
+                    ? "fill-text-primary text-text-primary"
+                    : "text-border-subtle"
+                )}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-text-secondary">
             {rating.averageRating.toFixed(1)} ({rating.totalRatings})
           </span>
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="mt-6">
         {inStock ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+          <span className="text-xs text-success">
             In stock
-            {stock != null && stock < 10 && ` (${stock} left)`}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
-            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+          <span className="text-xs text-text-secondary">
             Out of stock
           </span>
         )}
       </div>
 
       {tags && tags.length > 0 && (
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-8 flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary" size="sm">
+            <span key={tag} className="text-[0.6rem] font-medium tracking-[0.08em] uppercase text-text-secondary bg-border-subtle px-3 py-1.5">
               {tag}
-            </Badge>
+            </span>
           ))}
         </div>
       )}

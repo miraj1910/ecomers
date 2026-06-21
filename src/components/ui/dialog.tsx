@@ -1,80 +1,70 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { forwardRef, type HTMLAttributes, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { X } from "lucide-react"
 
 interface DialogProps {
-  open: boolean
-  onClose: () => void
-  children: React.ReactNode
+  children: ReactNode
+  open?: boolean
+  onClose?: () => void
   className?: string
 }
 
-export function Dialog({ open, onClose, children, className }: DialogProps) {
-  const overlayRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [open])
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
-    if (open) {
-      window.addEventListener("keydown", handleEscape)
-    }
-    return () => window.removeEventListener("keydown", handleEscape)
-  }, [open, onClose])
-
-  if (!open) return null
-
-  return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose()
-      }}
-    >
-      <div
-        className={cn(
-          "relative w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl animate-fade-in",
-          className
-        )}
-      >
-        <button
+const Dialog = forwardRef<HTMLDivElement, DialogProps>(
+  ({ children, open, onClose, className, ...props }, ref) => {
+    if (!open) return null
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div
+          className="fixed inset-0 bg-black/10 backdrop-blur-sm"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1 text-secondary transition-colors hover:text-foreground"
+        />
+        <div
+          ref={ref}
+          className={cn(
+            "relative z-50 w-full max-w-lg bg-white p-8",
+            className
+          )}
+          {...props}
         >
-          <X className="h-4 w-4" />
-        </button>
-        {children}
+          {children}
+        </div>
       </div>
-    </div>
+    )
+  }
+)
+Dialog.displayName = "Dialog"
+
+const DialogContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("space-y-4", className)} {...props} />
   )
-}
+)
+DialogContent.displayName = "DialogContent"
 
-export function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mb-4", className)}>{children}</div>
-}
+const DialogHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("mb-6", className)} {...props} />
+  )
+)
+DialogHeader.displayName = "DialogHeader"
 
-export function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h2 className={cn("text-lg font-semibold text-foreground", className)}>{children}</h2>
-}
+const DialogFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("flex items-center justify-end gap-2 mt-6", className)} {...props} />
+  )
+)
+DialogFooter.displayName = "DialogFooter"
 
-export function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("", className)}>{children}</div>
-}
+const DialogTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h2
+      ref={ref}
+      className={cn("font-serif text-2xl text-text-primary", className)}
+      {...props}
+    />
+  )
+)
+DialogTitle.displayName = "DialogTitle"
 
-export function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mt-6 flex items-center justify-end gap-3", className)}>{children}</div>
-}
+export { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle }

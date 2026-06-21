@@ -1,8 +1,9 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { CACHE_TAGS } from "@/lib/cache"
 import type { InventoryItem, InventoryPageData, InventoryUpdateInput, AddInventoryInput, StockValidationResult, StockStatus, ServerActionResult } from "@/types/prisma"
 
 async function requireAdmin() {
@@ -76,6 +77,8 @@ export async function updateInventoryItem(input: InventoryUpdateInput): Promise<
 
     revalidatePath("/admin/inventory")
     revalidatePath("/admin/products")
+    revalidateTag(CACHE_TAGS.inventory, 'max')
+    revalidateTag(CACHE_TAGS.products, 'max')
 
     return {
       success: true,
@@ -164,6 +167,8 @@ export async function deleteInventoryItem(productId: string): Promise<ServerActi
     })
 
     revalidatePath("/admin/inventory")
+    revalidateTag(CACHE_TAGS.inventory, 'max')
+    revalidateTag(CACHE_TAGS.products, 'max')
 
     return { success: true }
   } catch (error) {
@@ -268,6 +273,8 @@ export async function reduceStockAfterPayment(items: { productId: string; quanti
 
     revalidatePath("/admin/inventory")
     revalidatePath("/admin/products")
+    revalidateTag(CACHE_TAGS.inventory, 'max')
+    revalidateTag(CACHE_TAGS.products, 'max')
 
     return { success: true }
   } catch (error) {

@@ -20,7 +20,7 @@ export default async function AdminDashboard() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
           <p className="mt-1 text-sm text-secondary">
             Unable to load dashboard data. Please try again later.
           </p>
@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
         <p className="mt-1 text-sm text-secondary">
           Overview of your store
         </p>
@@ -82,7 +82,7 @@ export default async function AdminDashboard() {
               />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-white">{card.value}</p>
+              <p className="text-2xl font-bold text-foreground">{card.value}</p>
               {card.trend && (
                 <p className="mt-1 text-xs text-emerald-500">{card.trend}</p>
               )}

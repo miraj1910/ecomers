@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyCartState } from "@/components/cart/empty-cart-state"
 import { CartItemRow } from "@/components/cart/cart-item-row"
 import { CartSummary } from "@/components/cart/cart-summary"
+import { FrequentlyBoughtTogether } from "@/components/products/frequently-bought-together"
 import { useCart, removeFromServerCart, updateServerCart } from "@/store/cart"
 
 interface CartDrawerProps {
@@ -76,8 +77,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/45 backdrop-blur-sm"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm"
             onClick={onClose}
             aria-hidden="true"
           />
@@ -86,31 +87,30 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-background/95 text-foreground shadow-[0_0_80px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+            transition={{ type: "spring", damping: 35, stiffness: 300 }}
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white"
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
           >
-            <div className="flex items-center justify-between border-b border-border px-4 py-4">
+            <div className="flex items-center justify-between px-8 pt-8 pb-6 border-b border-border-subtle">
               <div>
-                <h2 className="text-base font-semibold text-foreground">Cart</h2>
-                <p className="text-xs text-secondary">
+                <h2 className="font-serif text-2xl font-normal text-text-primary">Cart</h2>
+                <p className="text-xs text-text-secondary mt-1">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={onClose}
                 aria-label="Close cart"
+                className="h-8 w-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
               >
-                <X className="h-4 w-4" />
-              </Button>
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             {error && (
-              <div className="mx-4 mt-2 rounded-xl border border-red-400/20 bg-red-400/12 px-4 py-2 text-xs text-red-300">
+              <div className="mx-8 mt-4 px-4 py-3 text-xs text-error bg-error/5">
                 {error}
               </div>
             )}
@@ -119,8 +119,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               <EmptyCartState onContinueShopping={onClose} />
             ) : (
               <>
-                <div className="flex-1 overflow-y-auto px-4 py-4">
-                  <ul className="flex flex-col gap-4">
+                <div className="flex-1 overflow-y-auto px-8 py-6">
+                  <ul className="flex flex-col gap-5">
                     {items.map((item) => (
                       <CartItemRow
                         key={item.productId}
@@ -131,6 +131,15 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                       />
                     ))}
                   </ul>
+
+                  <FrequentlyBoughtTogether
+                    items={items.map((i) => ({
+                      productId: i.productId,
+                      name: i.name,
+                      price: i.price,
+                      image: i.image,
+                    }))}
+                  />
                 </div>
 
                 <CartSummary

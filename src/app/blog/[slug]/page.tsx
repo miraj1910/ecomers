@@ -78,7 +78,7 @@ export default async function BlogPostPage({ params }: Props) {
           ]),
         ]}
       />
-      <div className="relative h-[40vh] min-h-[300px] bg-muted">
+      <div className="relative h-[50vh] min-h-[400px] bg-bg-secondary">
         <Image
           src={post.frontmatter.coverImage}
           alt={post.frontmatter.title}
@@ -87,12 +87,12 @@ export default async function BlogPostPage({ params }: Props) {
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/20 to-transparent" />
       </div>
 
       <Container>
-        <div className="mx-auto max-w-2xl -mt-20 relative z-10">
-          <div className="rounded-xl border border-border bg-card p-8 shadow-sm sm:p-12">
+        <div className="mx-auto max-w-2xl -mt-24 relative z-10">
+          <div className="bg-white p-8 sm:p-12 border border-border-subtle">
             <div className="flex flex-wrap gap-2 mb-4">
               {post.frontmatter.tags?.map((tag) => (
                 <Badge key={tag} variant="secondary" size="sm">
@@ -101,12 +101,12 @@ export default async function BlogPostPage({ params }: Props) {
               ))}
             </div>
 
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl mb-3">
+            <h1 className="heading-hero text-text-primary mb-3">
               {post.frontmatter.title}
             </h1>
 
-            <div className="flex items-center gap-4 text-sm text-secondary mb-8 pb-8 border-b border-border">
-              <span>{post.frontmatter.author ?? "STORE"}</span>
+            <div className="flex items-center gap-4 text-sm text-text-secondary mb-8 pb-8 border-b border-border-subtle">
+              <span>{post.frontmatter.author ?? "ATELIER"}</span>
               <span>&middot;</span>
               <time>
                 {new Date(post.frontmatter.date).toLocaleDateString("en-US", {

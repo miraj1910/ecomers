@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { rateLimitMiddleware } from "@/lib/security/rate-limit"
+import { validateCsrf } from "@/lib/security/csrf"
 import { validateBody, validateSearchParams } from "@/lib/api-validation"
 import { updateInventorySchema, addInventoryItemSchema, adminQuerySchema } from "@/lib/validations/admin"
 
@@ -60,6 +61,9 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })
@@ -94,6 +98,9 @@ export async function PATCH(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })
@@ -149,6 +156,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })

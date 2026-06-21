@@ -14,12 +14,12 @@ type RecentOrder = {
   itemCount: number
 }
 
-const statusColor: Record<string, string> = {
-  PENDING: "text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400",
-  PROCESSING: "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400",
-  SHIPPED: "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400",
-  DELIVERED: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
-  CANCELLED: "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400",
+const statusStyle: Record<string, string> = {
+  PENDING: "text-accent bg-accent/10",
+  PROCESSING: "text-accent bg-accent/10",
+  SHIPPED: "text-foreground bg-foreground/5",
+  DELIVERED: "text-success bg-success/10",
+  CANCELLED: "text-error bg-error/10",
 }
 
 const statusLabel: Record<string, string> = {
@@ -63,8 +63,8 @@ export function RecentOrdersTable({ orders }: { orders: RecentOrder[] }) {
                   ${order.totalAmount.toFixed(2)}
                 </span>
                 <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                    statusColor[order.orderStatus] ?? ""
+                  className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${
+                    statusStyle[order.orderStatus] ?? ""
                   }`}
                 >
                   {statusLabel[order.orderStatus] ?? order.orderStatus}

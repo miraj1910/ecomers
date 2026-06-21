@@ -1,8 +1,9 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { CACHE_TAGS } from "@/lib/cache"
 import type { ServerActionResult } from "@/types/prisma"
 
 export async function addToWishlist(
@@ -35,6 +36,7 @@ export async function addToWishlist(
     })
 
     revalidatePath("/wishlist")
+    revalidateTag(CACHE_TAGS.products, 'max')
     return { success: true }
   } catch (error) {
     console.error("Add to wishlist error:", error)
@@ -59,6 +61,7 @@ export async function removeFromWishlist(
     })
 
     revalidatePath("/wishlist")
+    revalidateTag(CACHE_TAGS.products, 'max')
     return { success: true }
   } catch (error) {
     console.error("Remove from wishlist error:", error)

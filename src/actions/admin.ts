@@ -1,10 +1,23 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { cookies } from "next/headers"
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from "@/lib/email/triggers"
+import { CACHE_TAGS } from "@/lib/cache"
+import { OrderStatusEnum, RoleEnum } from "@/lib/validations/admin"
+
+const ADMIN_COOKIE_NAME = "admin_token"
+const ADMIN_COOKIE_VALUE = "verified"
 
 async function requireAdmin() {
+  const cookieStore = await cookies()
+  const adminCookie = cookieStore.get(ADMIN_COOKIE_NAME)
+  if (adminCookie?.value === ADMIN_COOKIE_VALUE) {
+    return null
+  }
+
   const session = await auth()
   if (!session?.user) throw new Error("Unauthorized")
   if (session.user.role !== "ADMIN") throw new Error("Forbidden")
@@ -95,8 +108,6 @@ export async function getDashboardStats() {
   }
 }
 
-import { OrderStatusEnum, RoleEnum } from "@/lib/validations/admin"
-
 export async function getOrdersPage(page: number = 1, pageSize: number = 20, search?: string, status?: string) {
   await requireAdmin()
 
@@ -159,6 +170,46 @@ export async function updateOrderStatus(orderId: string, orderStatus: string) {
 
   revalidatePath("/admin/orders")
   revalidatePath(`/orders/${orderId}`)
+  revalidateTag(CACHE_TAGS.orders, 'max')
+
+  // Send email notifications for status changes
+  if (orderStatus === "SHIPPED" || orderStatus === "DELIVERED") {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    })
+
+    if (order) {
+      const emailData = {
+        id: order.id,
+        totalAmount: Number(order.totalAmount),
+        shippingName: order.shippingName,
+        shippingEmail: order.shippingEmail,
+        shippingStreet: order.shippingStreet,
+        shippingCity: order.shippingCity,
+        shippingState: order.shippingState,
+        shippingPostal: order.shippingPostal,
+        shippingCountry: order.shippingCountry,
+        items: order.items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+          size: item.size,
+          image: item.image,
+        })),
+      }
+
+      if (orderStatus === "SHIPPED") {
+        sendOrderShippedEmail(emailData).catch((err) => {
+          console.error(`[Admin] Failed to send shipped email for order ${orderId}:`, err)
+        })
+      } else {
+        sendOrderDeliveredEmail(emailData).catch((err) => {
+          console.error(`[Admin] Failed to send delivered email for order ${orderId}:`, err)
+        })
+      }
+    }
+  }
 }
 
 export async function getUsersPage(page: number = 1, pageSize: number = 20, search?: string) {
@@ -252,4 +303,35 @@ export async function updateProductStock(productId: string, stock: number) {
   })
 
   revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.inventory, 'max')
+  revalidateTag(CACHE_TAGS.products, 'max')
+}
+
+export async function bulkUpdateOrdersStatus(ids: string[], orderStatus: string) {
+  await requireAdmin()
+
+  const parsed = OrderStatusEnum.safeParse(orderStatus)
+  if (!parsed.success) throw new Error(`Invalid order status: ${orderStatus}`)
+
+  await prisma.order.updateMany({
+    where: { id: { in: ids } },
+    data: { orderStatus: parsed.data },
+  })
+
+  revalidatePath("/admin/orders")
+  revalidateTag(CACHE_TAGS.orders, 'max')
+}
+
+export async function bulkUpdateUsersRole(ids: string[], role: string) {
+  await requireAdmin()
+
+  const parsed = RoleEnum.safeParse(role)
+  if (!parsed.success) throw new Error(`Invalid role: ${role}`)
+
+  await prisma.user.updateMany({
+    where: { id: { in: ids }, deletedAt: null },
+    data: { role: parsed.data },
+  })
+
+  revalidatePath("/admin/users")
 }

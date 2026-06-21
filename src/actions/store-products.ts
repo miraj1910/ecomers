@@ -1,6 +1,23 @@
 import "server-only"
 import { prisma } from "@/lib/prisma"
+import { cached, CACHE_TAGS } from "@/lib/cache"
 import type { SanityProduct } from "@/sanity"
+
+const productSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  category: true,
+  brand: true,
+  price: true,
+  discountPrice: true,
+  stock: true,
+  sku: true,
+  images: true,
+  status: true,
+  createdAt: true,
+} as const
 
 function toSanityProduct(p: {
   id: string
@@ -45,40 +62,44 @@ function toSanityProduct(p: {
   }
 }
 
-export async function getStoreProducts(): Promise<SanityProduct[]> {
+async function fetchStoreProducts(): Promise<SanityProduct[]> {
   const products = await prisma.product.findMany({
     where: { deletedAt: null, status: "ACTIVE" },
     orderBy: { createdAt: "desc" },
+    select: productSelect,
   })
   return products.map(toSanityProduct)
 }
 
-export async function getStoreProductBySlug(slug: string): Promise<SanityProduct | null> {
+async function fetchStoreProductBySlug(slug: string): Promise<SanityProduct | null> {
   const product = await prisma.product.findUnique({
     where: { slug, deletedAt: null, status: "ACTIVE" },
+    select: productSelect,
   })
   if (!product) return null
   return toSanityProduct(product)
 }
 
-export async function getStoreProductById(id: string): Promise<SanityProduct | null> {
+async function fetchStoreProductById(id: string): Promise<SanityProduct | null> {
   const product = await prisma.product.findUnique({
     where: { id, deletedAt: null, status: "ACTIVE" },
+    select: productSelect,
   })
   if (!product) return null
   return toSanityProduct(product)
 }
 
-export async function getFeaturedStoreProducts(limit = 8): Promise<SanityProduct[]> {
+async function fetchFeaturedStoreProducts(limit = 8): Promise<SanityProduct[]> {
   const products = await prisma.product.findMany({
     where: { deletedAt: null, status: "ACTIVE" },
     orderBy: { createdAt: "desc" },
     take: limit,
+    select: productSelect,
   })
   return products.map(toSanityProduct)
 }
 
-export async function getStoreCategories(): Promise<{ title: string; slug: string }[]> {
+async function fetchStoreCategories(): Promise<{ title: string; slug: string }[]> {
   const categories = await prisma.product.findMany({
     where: { deletedAt: null, status: "ACTIVE", category: { not: null } },
     select: { category: true },
@@ -93,10 +114,11 @@ export async function getStoreCategories(): Promise<{ title: string; slug: strin
     .filter((c, i, arr) => arr.findIndex((x) => x.slug === c.slug) === i)
 }
 
-export async function getStoreProductsByCategory(categorySlug: string): Promise<SanityProduct[]> {
+async function fetchStoreProductsByCategory(categorySlug: string): Promise<SanityProduct[]> {
   const products = await prisma.product.findMany({
     where: { deletedAt: null, status: "ACTIVE" },
     orderBy: { createdAt: "desc" },
+    select: productSelect,
   })
   return products
     .filter((p) => {
@@ -106,3 +128,24 @@ export async function getStoreProductsByCategory(categorySlug: string): Promise<
     })
     .map(toSanityProduct)
 }
+
+export const getStoreProducts = cached(fetchStoreProducts, "store-products", [
+  CACHE_TAGS.products,
+  CACHE_TAGS.categories,
+])
+
+export const getStoreProductBySlug = cached(fetchStoreProductBySlug, "store-product-by-slug", [CACHE_TAGS.products])
+
+export const getStoreProductById = cached(fetchStoreProductById, "store-product-by-id", [CACHE_TAGS.products])
+
+export const getFeaturedStoreProducts = cached(fetchFeaturedStoreProducts, "featured-products", [
+  CACHE_TAGS.products,
+  CACHE_TAGS.featured,
+])
+
+export const getStoreCategories = cached(fetchStoreCategories, "store-categories", [CACHE_TAGS.categories])
+
+export const getStoreProductsByCategory = cached(fetchStoreProductsByCategory, "store-products-by-category", [
+  CACHE_TAGS.products,
+  CACHE_TAGS.categories,
+])

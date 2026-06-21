@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
-import { User, Mail, Shield, Calendar, BadgeCheck } from "lucide-react"
 import Link from "next/link"
 
 type UserProfile = Prisma.UserGetPayload<{ select: { role: true; createdAt: true } }>
@@ -34,67 +33,54 @@ export default async function ProfilePage() {
   return (
     <Section>
       <Container>
-        <h1 className="text-4xl font-bold tracking-tight text-white mb-8">Profile</h1>
+        <div className="mb-12">
+          <span className="meta">Account</span>
+          <h1 className="heading-section mt-2 text-text-primary">Profile</h1>
+        </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-2xl border border-border bg-surface p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <User className="h-4 w-4 text-accent" />
-                Account Information
-              </h2>
-              <dl className="space-y-4">
-                <div>
-                  <dt className="text-xs text-secondary mb-1">Name</dt>
-                  <dd className="text-sm font-medium text-white">{name}</dd>
+        <div className="grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-8">
+            <div>
+              <h2 className="font-serif text-xl font-normal text-text-primary mb-5">Account Information</h2>
+              <div className="space-y-4">
+                <div className="flex border-b border-border-subtle pb-4">
+                  <span className="text-xs text-text-secondary w-24 uppercase tracking-wider">Name</span>
+                  <span className="text-sm text-text-primary">{name}</span>
                 </div>
-                <div>
-                  <dt className="text-xs text-secondary mb-1 flex items-center gap-1.5">
-                    <Mail className="h-3 w-3" />
-                    Email
-                  </dt>
-                  <dd className="text-sm font-medium text-white">{email}</dd>
+                <div className="flex border-b border-border-subtle pb-4">
+                  <span className="text-xs text-text-secondary w-24 uppercase tracking-wider">Email</span>
+                  <span className="text-sm text-text-primary">{email}</span>
                 </div>
-                <div>
-                  <dt className="text-xs text-secondary mb-1 flex items-center gap-1.5">
-                    <BadgeCheck className="h-3 w-3" />
-                    Role
-                  </dt>
-                  <dd className="text-sm font-medium capitalize text-white">{role.toLowerCase()}</dd>
+                <div className="flex border-b border-border-subtle pb-4">
+                  <span className="text-xs text-text-secondary w-24 uppercase tracking-wider">Role</span>
+                  <span className="text-sm text-text-primary capitalize">{role.toLowerCase()}</span>
                 </div>
                 {joined && (
-                  <div>
-                    <dt className="text-xs text-secondary mb-1 flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3" />
-                      Member since
-                    </dt>
-                    <dd className="text-sm font-medium text-white">
+                  <div className="flex border-b border-border-subtle pb-4">
+                    <span className="text-xs text-text-secondary w-24 uppercase tracking-wider">Member</span>
+                    <span className="text-sm text-text-primary">
                       {joined.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
                       })}
-                    </dd>
+                    </span>
                   </div>
                 )}
-              </dl>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-accent" />
-                Account Security
-              </h2>
-              <p className="text-sm text-secondary">
-                You are signed in with Google. Your account is secured by
-                Google&apos;s authentication.
+            <div>
+              <h2 className="font-serif text-xl font-normal text-text-primary mb-5">Account Security</h2>
+              <p className="text-sm text-text-secondary">
+                You are signed in with Google. Your account is secured by Google&apos;s authentication.
               </p>
             </div>
           </div>
 
-          <div className="bg-surface border border-border rounded-2xl p-6 h-fit">
-            <h2 className="text-sm font-semibold text-white mb-3">Quick Links</h2>
-            <nav className="flex flex-col gap-1">
+          <div>
+            <h2 className="font-serif text-xl font-normal text-text-primary mb-5">Quick Links</h2>
+            <nav className="flex flex-col gap-2">
               {[
                 { href: "/wishlist", label: "Wishlist" },
                 { href: "/orders", label: "Order History" },
@@ -102,7 +88,7 @@ export default async function ProfilePage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-xl px-3 py-2 text-sm text-secondary transition-colors hover:bg-white/[0.07] hover:text-white"
+                  className="text-sm text-text-secondary hover:text-text-primary transition-colors"
                 >
                   {link.label}
                 </Link>

@@ -1,10 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { Heart, ShoppingBag, Star } from "lucide-react"
+import { Heart, ShoppingBag } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import type { ProductCardData } from "@/types"
 
 interface ProductCardProps {
@@ -39,9 +38,9 @@ export function ProductCard({
         className
       )}
     >
-      <div className={cn("relative overflow-hidden bg-[#E5DDD2]", aspectClass)}>
+      <div className={cn("product-image-container relative", aspectClass)}>
         {!imageLoaded && (
-          <div className="absolute inset-0 animate-pulse bg-foreground/[0.03]" />
+          <div className="absolute inset-0 bg-bg-secondary" />
         )}
         <Image
           src={product.image}
@@ -49,98 +48,77 @@ export function ProductCard({
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className={cn(
-            "object-cover transition-all duration-500 group-hover:scale-105",
+            "object-cover",
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
           onLoad={() => setImageLoaded(true)}
         />
 
         {product.badge && (
-          <span
-            className={cn(
-              "editorial-kicker absolute left-3 top-3 inline-flex items-center bg-surface/85 px-2.5 py-1",
-              product.badge === "Sale" || product.badge === "sale"
-                ? "text-sale"
-                : "text-foreground"
-            )}
-          >
+          <span className="absolute left-4 top-4 text-[0.55rem] font-medium tracking-[0.15em] uppercase text-text-primary bg-white/90 px-3 py-1.5">
             {product.badge}
           </span>
         )}
 
         {!product.inStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-[2px]">
-            <span className="editorial-kicker text-foreground">
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/60">
+            <span className="text-[0.65rem] font-medium tracking-[0.15em] uppercase text-text-primary">
               Out of Stock
             </span>
           </div>
         )}
 
-        <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute right-4 top-4 flex flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           {onToggleWishlist && (
-            <Button
-              variant="secondary"
-              size="icon"
+            <button
               onClick={(e) => {
                 e.preventDefault()
                 onToggleWishlist(product)
               }}
               aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className="h-8 w-8 rounded-full border-border bg-surface/85 backdrop-blur-sm hover:bg-background"
+              className="flex h-9 w-9 items-center justify-center bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
             >
               <Heart
                 className={cn(
                   "h-4 w-4 transition-colors",
-                  isWishlisted && "fill-sale text-sale"
+                  isWishlisted ? "fill-text-primary text-text-primary" : "text-text-secondary"
                 )}
               />
-            </Button>
+            </button>
           )}
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 pt-4">
-        <p className="editorial-kicker text-muted">{product.category}</p>
+      <div className="flex flex-col gap-2 pt-5">
+        <p className="meta">{product.category}</p>
 
-        <h3 className="max-w-full break-words text-[0.72rem] font-bold uppercase leading-5 tracking-[0.16em] text-foreground [overflow-wrap:anywhere]">
+        <h3 className="heading-product text-text-primary max-w-full break-words [overflow-wrap:anywhere]">
           {product.name}
         </h3>
 
-        <div className="flex items-center gap-1.5">
-          <Star className="h-3 w-3 fill-star text-star" />
-          <span className="text-xs text-muted">
-            {product.rating}
-            {product.reviewCount && product.reviewCount > 0 && (
-              <> ({product.reviewCount})</>
-            )}
-          </span>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-secondary">
-              ${product.price.toFixed(2)}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-text-primary">
+              ${product.price.toFixed(0)}
             </span>
             {product.originalPrice && (
-              <span className="text-xs text-muted line-through">
-                ${product.originalPrice.toFixed(2)}
+              <span className="text-sm text-text-muted line-through">
+                ${product.originalPrice.toFixed(0)}
               </span>
             )}
           </div>
 
           {onAddToCart && product.inStock !== false && (
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={(e) => {
                 e.preventDefault()
                 onAddToCart(product)
               }}
               aria-label="Add to cart"
-              className="h-8 w-8 rounded-full text-secondary hover:bg-foreground/[0.06] hover:text-foreground"
+              className="h-9 w-9 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100"
             >
               <ShoppingBag className="h-4 w-4" />
-            </Button>
+            </button>
           )}
         </div>
       </div>

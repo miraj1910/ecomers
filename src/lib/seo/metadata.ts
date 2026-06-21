@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
 
 export const siteConfig = {
-  name: "STORE",
-  description: "Curated modern essentials for the minimalist lifestyle. Premium quality pieces designed to last.",
+  name: "ATELIER",
+  description: "Timeless objects and apparel crafted with intention. Premium materials, expert craftsmanship, enduring design.",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ogImage: "/opengraph-image",
   locale: "en_US",
-  twitterHandle: "@store",
+  twitterHandle: "@atelier",
 }
 
 type OpenGraphImage = {

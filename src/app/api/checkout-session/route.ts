@@ -3,22 +3,36 @@ import { getStripe } from "@/lib/stripe"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { rateLimitMiddleware, getRateLimitKey } from "@/lib/security/rate-limit"
+import { validateCsrf } from "@/lib/security/csrf"
 import { validateBody } from "@/lib/api-validation"
 import { checkoutSessionSchema } from "@/lib/validations/checkout"
+import { trackCartForRecovery } from "@/lib/cart-recovery"
+import { trackEvent } from "@/lib/analytics"
 
 export async function POST(request: Request) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const ip = getRateLimitKey(request)
   const rateLimitResponse = rateLimitMiddleware(`checkout:${ip}`, { maxRequests: 10, interval: 60_000 })
   if (rateLimitResponse) return rateLimitResponse
 
-  try {
-    const session = await auth()
-    const userId = session?.user?.id ?? `guest_${crypto.randomUUID()}`
+  const session = await auth()
+  const userId = session?.user?.id ?? `guest_${crypto.randomUUID()}`
+  let shipping: Record<string, unknown> = {}
+  let checkoutItems: { productId: string; name: string; price: number; quantity: number; size?: string; image?: string }[] = []
+  let couponCode: string | undefined
+  let discountAmount: number | undefined
 
+  try {
     const body = await request.json()
     const parsed = validateBody(body, checkoutSessionSchema)
     if (parsed.error) return parsed.error
-    const { items } = parsed.data
+    const { items, shipping: parsedShipping, couponCode: cc, discountAmount: da } = parsed.data
+    checkoutItems = items
+    shipping = parsedShipping
+    couponCode = cc
+    discountAmount = da
 
     const insufficientItems: {
       productId: string
@@ -27,7 +41,7 @@ export async function POST(request: Request) {
       available: number
     }[] = []
 
-    for (const item of items) {
+    for (const item of checkoutItems) {
       const inventory = await prisma.productInventory.findUnique({
         where: { productId: item.productId },
       })
@@ -61,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     const productStocks = new Map<string, { stock: number; sku: string }>()
-    for (const item of items) {
+    for (const item of checkoutItems) {
       const existingInventory = await prisma.productInventory.findUnique({
         where: { productId: item.productId },
       })
@@ -107,7 +121,7 @@ export async function POST(request: Request) {
     const metadata: Record<string, string> = {
       userId,
       cart: JSON.stringify(
-        items.map((item) => ({
+        checkoutItems.map((item) => ({
           productId: item.productId,
           name: item.name,
           price: item.price,
@@ -115,13 +129,15 @@ export async function POST(request: Request) {
           size: item.size ?? "",
         }))
       ),
+      shipping: JSON.stringify(shipping),
+      ...(couponCode ? { couponCode: couponCode, discountAmount: String(discountAmount ?? 0) } : {}),
     }
 
     const stripeSession = await stripe.checkout.sessions.create({
       mode: "payment",
       client_reference_id: userId,
       metadata,
-      line_items: items.map((item) => ({
+      line_items: checkoutItems.map((item) => ({
         price_data: {
           currency: "usd",
           product_data: {
@@ -144,5 +160,19 @@ export async function POST(request: Request) {
       { error: "Failed to create checkout session" },
       { status: 500 }
     )
+  } finally {
+    // Track for recovery outside try/catch — won't throw
+    if (shipping?.email) {
+      trackCartForRecovery(shipping.email as string, userId, {
+        items: checkoutItems.map((i) => ({
+          productId: i.productId,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          image: i.image,
+          size: i.size,
+        })),
+      }).catch(() => {})
+    }
   }
 }

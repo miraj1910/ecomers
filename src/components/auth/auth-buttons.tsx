@@ -9,16 +9,16 @@ export function AuthButtons() {
   const { data: session, status } = useSession()
   const isLoaded = status !== "loading"
 
-  if (!isLoaded) return <div className="h-8 w-8 rounded-full bg-surface animate-pulse" />
+  if (!isLoaded) return <div className="h-8 w-8 rounded-full bg-border-subtle animate-pulse" />
 
   if (session?.user) return <UserMenu />
 
   return (
     <Link
       href="/sign-in"
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-secondary transition-colors hover:text-foreground hover:border-border"
+      className="flex h-10 w-10 items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
     >
-      <User className="h-4 w-4" />
+      <User className="h-[18px] w-[18px]" />
     </Link>
   )
 }

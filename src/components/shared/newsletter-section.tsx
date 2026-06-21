@@ -2,10 +2,8 @@
 
 import { useState } from "react"
 import { Container } from "@/components/layout/container"
-import { Section } from "@/components/layout/section"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Mail } from "lucide-react"
+import { motion } from "framer-motion"
 
 export function NewsletterSection() {
   const [email, setEmail] = useState("")
@@ -16,40 +14,43 @@ export function NewsletterSection() {
   }
 
   return (
-    <Section>
+    <section className="bg-bg-warm py-32">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 border border-accent/20 mb-6">
-            <Mail className="h-6 w-6 text-accent" />
-          </div>
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
-            Stay in the loop
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-xl text-center"
+        >
+          <span className="meta">Stay Connected</span>
+          <h2 className="heading-section mt-4 text-text-primary">
+            Join Our Newsletter
           </h2>
-          <p className="mt-3 text-sm text-secondary leading-relaxed max-w-md mx-auto">
-            Subscribe to get notified about new arrivals, exclusive
-            drops, and early access to sales.
+          <p className="mt-4 text-base leading-relaxed text-text-secondary max-w-md mx-auto">
+            Subscribe to receive early access to new collections, exclusive drops, and curated stories.
           </p>
           <form
             onSubmit={handleSubmit}
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
+            className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center"
           >
-            <Input
+            <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="sm:max-w-xs"
+              className="h-14 flex-1 min-w-0 bg-transparent border-b border-border-subtle px-0 text-base text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-text-primary transition-colors"
             />
-            <Button type="submit" variant="default">
+            <Button type="submit" variant="primary" size="lg">
               Subscribe
             </Button>
           </form>
-          <p className="mt-4 text-xs text-muted">
+          <p className="mt-6 text-xs text-text-muted">
             No spam, unsubscribe at any time.
           </p>
-        </div>
+        </motion.div>
       </Container>
-    </Section>
+    </section>
   )
 }

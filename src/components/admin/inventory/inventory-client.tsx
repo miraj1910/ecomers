@@ -311,7 +311,7 @@ export function InventoryClient({
             Add Item
           </Button>
           <Button
-            variant={bulkMode ? "default" : "outline"}
+            variant={bulkMode ? "primary" : "outline"}
             onClick={() => {
               setBulkMode(!bulkMode)
               setBulkUpdates({})
@@ -407,9 +407,9 @@ export function InventoryClient({
                   key={item.id}
                   className={`transition-colors hover:bg-foreground/[0.05] ${
                     isOut
-                      ? "bg-red-500/5"
+                      ? "bg-error/5"
                       : isLow
-                        ? "bg-amber-500/5"
+                        ? "bg-accent/5"
                         : ""
                   }`}
                 >
@@ -459,10 +459,10 @@ export function InventoryClient({
                     <span
                       className={`text-sm font-medium ${
                         isOut
-                          ? "text-red-500"
+                          ? "text-error"
                           : isLow
-                            ? "text-amber-500"
-                            : "text-emerald-500"
+                            ? "text-accent"
+                            : "text-success"
                       }`}
                     >
                       {available}
@@ -487,7 +487,7 @@ export function InventoryClient({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-secondary hover:text-red-400"
+                      className="h-8 w-8 p-0 text-secondary hover:text-error"
                       onClick={() => handleRemoveItem(item.productId)}
                       disabled={removing === item.productId}
                       title="Remove from inventory"

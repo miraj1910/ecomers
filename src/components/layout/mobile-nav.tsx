@@ -2,15 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useSyncExternalStore } from "react"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 const links = [
   { title: "Shop", href: "/products" },
-  { title: "Collections", href: "/category/clothing" },
+  { title: "Collections", href: "/category/all" },
   { title: "Journal", href: "/blog" },
   { title: "About", href: "/about" },
 ]
@@ -25,52 +24,61 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   if (!mounted) return null
-  if (!open) return null
 
   return (
-    <>
-      <motion.div
-        key="overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-40 bg-black/35 backdrop-blur-sm md:hidden"
-        onClick={onClose}
-      />
-      <motion.div
-        key="panel"
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed inset-y-0 right-0 z-50 w-80 max-w-[86vw] border-l border-border bg-surface/95 px-7 py-6 shadow-2xl backdrop-blur-2xl md:hidden"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <span className="editorial-kicker text-muted">Menu</span>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key="mobile-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-black/10 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            key="mobile-panel"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 35, stiffness: 300 }}
+            className="fixed inset-y-0 right-0 z-50 w-96 max-w-[85vw] bg-white px-10 py-10"
+          >
+            <div className="flex items-center justify-between mb-12">
+              <span className="text-[0.65rem] font-medium tracking-[0.2em] uppercase text-text-muted">Navigation</span>
+              <button onClick={onClose} className="h-8 w-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-        <nav className="flex flex-col border-y border-border py-3">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={onClose}
-              className={cn(
-                "py-4 font-serif text-3xl font-normal leading-none transition-colors",
-                pathname === link.href
-                  ? "text-foreground"
-                  : "text-secondary hover:text-foreground"
-              )}
-            >
-              {link.title}
-            </Link>
-          ))}
-        </nav>
-      </motion.div>
-    </>
+            <nav className="flex flex-col gap-1">
+              {links.map((link, i) => (
+                <motion.div
+                  key={link.href}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
+                >
+                  <Link
+                    href={link.href}
+                    onClick={onClose}
+                    className={cn(
+                      "block py-5 font-serif text-4xl font-normal leading-none tracking-tight transition-colors border-b border-border-subtle",
+                      pathname === link.href
+                        ? "text-text-primary"
+                        : "text-text-secondary hover:text-text-primary"
+                    )}
+                  >
+                    {link.title}
+                  </Link>
+                </motion.div>
+              ))}
+            </nav>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }

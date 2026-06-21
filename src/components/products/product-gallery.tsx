@@ -30,10 +30,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   if (!current) return null
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-5">
       <div
         ref={containerRef}
-        className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted cursor-crosshair"
+        className="relative aspect-[4/5] overflow-hidden bg-bg-secondary cursor-crosshair"
         onMouseEnter={() => setZoom(true)}
         onMouseLeave={() => setZoom(false)}
         onMouseMove={handleMouseMove}
@@ -45,7 +45,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           alt={current.alt ?? productName}
           fill
           preload
-          className="object-cover transition-transform duration-200"
+          className="object-cover transition-transform duration-300"
           style={{
             transform: zoom ? "scale(1.8)" : "scale(1)",
             transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
@@ -68,10 +68,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               aria-label={img.alt ?? `View image ${i + 1}`}
               onClick={() => setSelectedIndex(i)}
               className={cn(
-                "relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-muted transition-colors",
+                "relative aspect-square w-20 shrink-0 overflow-hidden bg-bg-secondary transition-all duration-300",
                 i === selectedIndex
-                  ? "border-foreground"
-                  : "border-border hover:border-muted-foreground/50"
+                  ? "opacity-100 ring-1 ring-text-primary"
+                  : "opacity-60 hover:opacity-80"
               )}
             >
               <Image
@@ -79,7 +79,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 alt={img.alt ?? `${productName} thumbnail ${i + 1}`}
                 fill
                 className="object-cover"
-                sizes="64px"
+                sizes="80px"
               />
             </button>
           ))}

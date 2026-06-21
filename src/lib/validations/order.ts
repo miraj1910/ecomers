@@ -14,6 +14,11 @@ export const createOrderSchema = z.object({
   stripeSessionId: z.string().max(255).optional(),
   paymentIntentId: z.string().max(255).optional(),
   totalAmount: price,
+  shippingName: z.string().optional(),
+  shippingStreet: z.string().optional(),
+  shippingCity: z.string().optional(),
+  shippingState: z.string().optional(),
+  shippingPostal: z.string().optional(),
   items: z.array(orderItemSchema).min(1, "At least one item is required"),
 })
 

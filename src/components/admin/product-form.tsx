@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,11 +10,18 @@ import { ImageUpload } from "@/components/admin/image-upload"
 import { Save, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 
+type CategoryOption = {
+  id: string
+  name: string
+  slug: string
+}
+
 type ProductFormData = {
   name: string
   slug: string
   description: string
   category: string
+  categoryId: string | null
   brand: string
   price: number
   discountPrice: number | null
@@ -39,6 +46,7 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       slug: "",
       description: "",
       category: "",
+      categoryId: null,
       brand: "",
       price: 0,
       discountPrice: null,
@@ -48,8 +56,22 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
       status: "ACTIVE",
     }
   )
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch("/api/admin/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(data)
+        } else if (data?.categories) {
+          setCategories(data.categories)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const updateField = <K extends keyof ProductFormData>(
     key: K,
@@ -67,6 +89,15 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
           : "",
       }))
     }
+  }
+
+  const handleCategoryChange = (categoryId: string) => {
+    const cat = categories.find((c) => c.id === categoryId)
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: categoryId || null,
+      category: cat?.name ?? "",
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -167,12 +198,15 @@ export function ProductForm({ initialData, productId }: ProductFormProps) {
                 placeholder="Product description..."
               />
               <div className="grid grid-cols-2 gap-4">
-                <Input
+                <Select
                   label="Category"
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => updateField("category", e.target.value)}
-                  placeholder="e.g. Electronics"
+                  id="categoryId"
+                  value={formData.categoryId ?? ""}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  options={[
+                    { value: "", label: "No category" },
+                    ...categories.map((c) => ({ value: c.id, label: c.name })),
+                  ]}
                 />
                 <Input
                   label="Brand"

@@ -30,13 +30,13 @@ export function StarRating({
             key={star}
             type="button"
             onClick={() => onChange?.(star)}
-            className="transition-colors hover:text-amber-400 focus:outline-none"
+            className="transition-colors hover:text-accent focus:outline-none"
           >
             <Star
               className={cn(
                 sizeMap[size],
                 star <= rating
-                  ? "fill-amber-400 text-amber-400"
+                  ? "fill-accent text-accent"
                   : "fill-none text-secondary/30"
               )}
             />
@@ -54,7 +54,7 @@ export function StarRating({
           className={cn(
             sizeMap[size],
             star <= rating
-              ? "fill-amber-400 text-amber-400"
+              ? "fill-accent text-accent"
               : "fill-none text-secondary/30"
           )}
         />
@@ -81,7 +81,7 @@ export function RatingDistribution({
         return (
           <div key={star} className="flex items-center gap-2 text-xs">
             <span className="w-6 text-right text-secondary">{star}</span>
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+            <Star className="h-3 w-3 fill-accent text-accent" />
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-amber-400 transition-all"

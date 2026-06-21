@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { getStripe } from "@/lib/stripe"
 import { prisma } from "@/lib/prisma"
 import { rateLimitMiddleware, getRateLimitKey } from "@/lib/security/rate-limit"
+import { CACHE_TAGS } from "@/lib/cache"
+import { sendOrderConfirmationEmail } from "@/lib/email/triggers"
+import { markRecoveredByEmail } from "@/lib/cart-recovery"
+import { trackEvent } from "@/lib/analytics"
 import type Stripe from "stripe"
 
 export const runtime = "nodejs"
@@ -77,6 +81,11 @@ export async function POST(req: Request) {
       const productByName = new Map(dbProducts.map((p) => [p.name, p]))
       cartItems = lineItems.data.map((item) => {
         const product = productByName.get(item.description ?? "")
+        if (!product) {
+          console.warn(
+            `[Stripe Webhook] No matching product for line item: "${item.description}". Skipping.`
+          )
+        }
         return {
           productId: product?.id ?? "unknown",
           name: item.description ?? "Unknown",
@@ -87,12 +96,63 @@ export async function POST(req: Request) {
           image: product?.images?.[0],
         }
       })
+      cartItems = cartItems.filter((item) => item.productId !== "unknown")
     }
 
-    const totalAmount =
-      stripeSession.amount_total != null
-        ? stripeSession.amount_total / 100
-        : cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const totalAmount =
+        stripeSession.amount_total != null
+          ? stripeSession.amount_total / 100
+          : cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+      let shippingData: {
+        shippingName: string
+        shippingEmail?: string
+        shippingPhone?: string
+        shippingStreet: string
+        shippingCity: string
+        shippingState: string
+        shippingPostal: string
+        shippingCountry: string
+      } | null = null
+
+      try {
+        const raw = stripeSession.metadata?.shipping
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          shippingData = {
+            shippingName: `${parsed.firstName} ${parsed.lastName}`,
+            shippingEmail: parsed.email,
+            shippingPhone: parsed.phone,
+            shippingStreet: parsed.addressLine1,
+            shippingCity: parsed.city,
+            shippingState: parsed.state,
+            shippingPostal: parsed.postalCode,
+            shippingCountry: parsed.country,
+          }
+        }
+      } catch {
+        // invalid shipping metadata - proceed without
+      }
+
+      let couponCode: string | null = null
+      let discountAmount: number | null = null
+      let couponId: string | null = null
+
+      try {
+        couponCode = stripeSession.metadata?.couponCode ?? null
+        discountAmount = stripeSession.metadata?.discountAmount
+          ? Number(stripeSession.metadata.discountAmount)
+          : null
+      } catch {
+        // ignore
+      }
+
+      if (couponCode) {
+        const coupon = await prisma.coupon.findUnique({ where: { code: couponCode } })
+        if (coupon) {
+          couponId = coupon.id
+        }
+      }
 
     await prisma.$transaction(async (tx) => {
       const existingOrder = await tx.order.findUnique({
@@ -134,7 +194,17 @@ export async function POST(req: Request) {
           stripeSessionId: stripeSession.id,
           paymentIntentId,
           totalAmount,
+          discountAmount: discountAmount ?? null,
+          couponId,
           paymentStatus: "PAID",
+          shippingName: shippingData?.shippingName ?? "Guest",
+      shippingEmail: shippingData?.shippingEmail,
+      shippingPhone: shippingData?.shippingPhone,
+      shippingStreet: shippingData?.shippingStreet ?? "",
+      shippingCity: shippingData?.shippingCity ?? "",
+      shippingState: shippingData?.shippingState ?? "",
+      shippingPostal: shippingData?.shippingPostal ?? "",
+      shippingCountry: shippingData?.shippingCountry ?? "US",
           items: {
             create: cartItems.map((item) => ({
               productId: item.productId,
@@ -196,6 +266,67 @@ export async function POST(req: Request) {
 
     revalidatePath("/orders")
     revalidatePath("/products")
+    revalidateTag(CACHE_TAGS.orders, 'max')
+    revalidateTag(CACHE_TAGS.products, 'max')
+    revalidateTag(CACHE_TAGS.inventory, 'max')
+
+    // Increment coupon usage count outside transaction
+    if (couponCode) {
+      prisma.coupon
+        .update({
+          where: { code: couponCode },
+          data: { usedCount: { increment: 1 } },
+        })
+        .catch((err) => {
+          console.error("[Stripe Webhook] Failed to increment coupon usage:", err)
+        })
+    }
+
+    // Send confirmation email outside transaction
+    const createdOrder = await prisma.order.findUnique({
+      where: { stripeSessionId: stripeSession.id },
+      include: { items: true },
+    })
+
+    if (createdOrder) {
+      sendOrderConfirmationEmail({
+        id: createdOrder.id,
+        totalAmount: Number(createdOrder.totalAmount),
+        shippingName: createdOrder.shippingName,
+        shippingEmail: createdOrder.shippingEmail,
+        shippingStreet: createdOrder.shippingStreet,
+        shippingCity: createdOrder.shippingCity,
+        shippingState: createdOrder.shippingState,
+        shippingPostal: createdOrder.shippingPostal,
+        shippingCountry: createdOrder.shippingCountry,
+        items: createdOrder.items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+          size: item.size,
+          image: item.image,
+        })),
+      }).catch((err) => {
+        console.error("[Stripe Webhook] Failed to send confirmation email:", err)
+      })
+    }
+
+    // Track analytics & cart recovery
+    const shippingEmail = shippingData?.shippingEmail
+    if (shippingEmail) {
+      markRecoveredByEmail(shippingEmail).catch(() => {})
+    }
+
+    trackEvent("order_completed", {
+      orderId: stripeSession.id,
+      totalAmount,
+      hasCoupon: !!couponCode,
+      couponCode,
+    })
+
+    if (couponCode) {
+      trackEvent("coupon_used", { couponCode, discountAmount, orderId: stripeSession.id })
+    }
 
     return NextResponse.json({ received: true })
   } catch (error) {

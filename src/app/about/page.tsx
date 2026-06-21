@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { MDXRemote } from "next-mdx-remote/rsc"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
@@ -40,11 +41,12 @@ export default function AboutPage() {
             { name: "About", href: "/about" },
           ])}
         />
-        <div className="bg-surface border border-border mx-auto max-w-3xl rounded-3xl p-8 sm:p-12">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-8">
+        <div className="mx-auto max-w-3xl">
+          <span className="meta">About</span>
+          <h1 className="heading-hero mt-4 text-text-primary">
             {page?.frontmatter.title ?? "About"}
           </h1>
-          <div className="prose-custom">
+          <div className="mt-10 text-base leading-relaxed text-text-secondary space-y-6">
             <MDXRemote
               source={page?.content ?? ""}
               components={components}

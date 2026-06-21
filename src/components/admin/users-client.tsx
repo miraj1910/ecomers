@@ -49,6 +49,9 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
   const [deleteDialog, setDeleteDialog] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkRole, setBulkRole] = useState("ADMIN")
+  const [bulkRunning, setBulkRunning] = useState(false)
 
   const fetchPage = useCallback(async (page: number, q?: string) => {
     setLoading(true)
@@ -61,6 +64,42 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
     setData(json)
     setLoading(false)
   }, [])
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === data.users.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(data.users.map((u) => u.id)))
+    }
+  }
+
+  const executeBulkRole = useCallback(async () => {
+    if (selectedIds.size === 0) return
+    setBulkRunning(true)
+    try {
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), role: bulkRole }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || "Bulk role update failed")
+      setSelectedIds(new Set())
+      fetchPage(data.page, search)
+      router.refresh()
+    } catch (err) {
+      console.error("Bulk role update failed:", err)
+    }
+    setBulkRunning(false)
+  }, [selectedIds, bulkRole, data.page, search, fetchPage, router])
 
   const handleSearch = useCallback(() => {
     fetchPage(1, search)
@@ -141,10 +180,40 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
         </Button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-foreground/[0.04] px-4 py-3">
+          <span className="text-sm font-medium text-foreground">
+            {selectedIds.size} selected
+          </span>
+          <select
+            className="rounded-xl border border-border bg-foreground/[0.07] px-3 py-2 text-sm text-foreground backdrop-blur-xl"
+            value={bulkRole}
+            onChange={(e) => setBulkRole(e.target.value)}
+          >
+            <option value="ADMIN">Promote to Admin</option>
+            <option value="CUSTOMER">Demote to Customer</option>
+          </select>
+          <Button size="sm" onClick={executeBulkRole} disabled={bulkRunning}>
+            {bulkRunning ? "Updating..." : "Update Role"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setSelectedIds(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-border">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-foreground/[0.05]">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-secondary">
+                <input
+                  type="checkbox"
+                  checked={data.users.length > 0 && selectedIds.size === data.users.length}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 rounded border-border"
+                />
+              </th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase text-secondary">
                 User
               </th>
@@ -174,6 +243,14 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
                 key={user.id}
                 className="transition-colors hover:bg-foreground/[0.05]"
               >
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(user.id)}
+                    onChange={() => toggleSelect(user.id)}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/[0.08]">
@@ -219,7 +296,7 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                         user.role === "ADMIN"
-                          ? "border border-indigo-400/20 bg-indigo-400/12 text-indigo-300"
+                          ? "border border-accent/20 bg-accent/10 text-accent"
                           : "text-secondary bg-foreground/[0.06]"
                       }`}
                     >
@@ -252,7 +329,7 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
                           handleAction(user.id, "status", "BLOCKED")
                         }
                         disabled={updating === user.id}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-amber-500/10 hover:text-amber-500 disabled:opacity-50"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-accent/10 hover:text-accent disabled:opacity-50"
                         title="Block User"
                       >
                         <Ban className="h-3.5 w-3.5" />
@@ -263,7 +340,7 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
                           handleAction(user.id, "status", "ACTIVE")
                         }
                         disabled={updating === user.id}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-emerald-500/10 hover:text-emerald-500 disabled:opacity-50"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-success/10 hover:text-success disabled:opacity-50"
                         title="Unblock User"
                       >
                         <CheckCircle className="h-3.5 w-3.5" />
@@ -272,7 +349,7 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
                     <button
                       onClick={() => setDeleteDialog(user.id)}
                       disabled={updating === user.id}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-50"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
                       title="Delete User"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -335,8 +412,8 @@ export function AdminUsersClient({ initialData }: { initialData: PageData }) {
             Cancel
           </Button>
           <Button
-            variant="default"
-            className="bg-red-500 hover:bg-red-600"
+            variant="primary"
+            className="bg-error hover:bg-error/80"
             disabled={updating === deleteDialog}
             onClick={() => deleteDialog && handleDelete(deleteDialog)}
           >

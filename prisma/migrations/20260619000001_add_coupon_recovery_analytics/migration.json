@@ -1,0 +1,92 @@
+{
+  "version": "5.22.0",
+  "steps": [
+    {
+      "tag": "CreateEnum",
+      "enum": "CouponType",
+      "values": ["PERCENTAGE", "FIXED"]
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "Coupon_code_key",
+        "unique": true,
+        "table": "Coupon",
+        "columns": ["code"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "Coupon_code_idx",
+        "table": "Coupon",
+        "columns": ["code"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "Coupon_active_idx",
+        "table": "Coupon",
+        "columns": ["active"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "CartRecovery_email_idx",
+        "table": "CartRecovery",
+        "columns": ["email"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "CartRecovery_emailSentAt_idx",
+        "table": "CartRecovery",
+        "columns": ["emailSentAt"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "CartRecovery_recoveredAt_idx",
+        "table": "CartRecovery",
+        "columns": ["recoveredAt"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "AnalyticsEvent_event_idx",
+        "table": "AnalyticsEvent",
+        "columns": ["event"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "AnalyticsEvent_createdAt_idx",
+        "table": "AnalyticsEvent",
+        "columns": ["createdAt"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "AnalyticsEvent_event_createdAt_idx",
+        "table": "AnalyticsEvent",
+        "columns": ["event", "createdAt"]
+      }
+    },
+    {
+      "tag": "CreateIndex",
+      "index": {
+        "name": "Order_couponId_idx",
+        "table": "Order",
+        "columns": ["couponId"]
+      }
+    }
+  ],
+  "datamodel": "PostgreSQL"
+}

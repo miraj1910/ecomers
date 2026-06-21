@@ -87,24 +87,22 @@ export function ProductActions({
     <div>
       {sizes && sizes.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium">
+          <h3 className="meta">
             Size
             {selectedSize && (
-              <span className="text-secondary font-normal ml-1">
-                — {selectedSize}
-              </span>
+              <span className="text-text-primary ml-2">{selectedSize}</span>
             )}
           </h3>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {sizes.map((size) => (
               <button
                 key={size}
                 onClick={() => setSelectedSize(size)}
                 className={cn(
-                  "flex h-10 w-14 items-center justify-center rounded-lg border text-sm font-medium transition-all",
+                  "flex h-12 w-14 items-center justify-center text-sm font-medium transition-all duration-300",
                   selectedSize === size
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border hover:border-foreground/50"
+                    ? "bg-text-primary text-white"
+                    : "bg-transparent text-text-primary border border-border-subtle hover:border-text-primary"
                 )}
                 aria-pressed={selectedSize === size}
               >
@@ -115,9 +113,9 @@ export function ProductActions({
         </div>
       )}
 
-      <div className="mt-6">
-        <h3 className="text-sm font-medium">Quantity</h3>
-        <div className="mt-2">
+      <div className="mt-8">
+        <h3 className="meta">Quantity</h3>
+        <div className="mt-3">
           <QuantitySelector
             value={quantity}
             onChange={setQuantity}
@@ -128,30 +126,28 @@ export function ProductActions({
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-10 flex flex-col gap-4 sm:flex-row">
         <Button
           size="lg"
           disabled={!inStock}
           onClick={handleAddToCart}
-          className="flex-1 gap-2"
+          className="flex-1"
         >
           {inStock ? "Add to Cart" : "Out of Stock"}
         </Button>
 
-        <Button
-          variant="outline"
-          size="lg"
+        <button
           onClick={handleWishlistToggle}
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          className="w-full sm:w-auto"
+          className="flex h-14 w-14 items-center justify-center border border-border-subtle transition-colors hover:bg-bg-warm"
         >
           <Heart
             className={cn(
-              "h-4 w-4 transition-colors",
-              wishlisted && "fill-red-500 text-red-500"
+              "h-5 w-5 transition-colors",
+              wishlisted && "fill-text-primary text-text-primary"
             )}
           />
-        </Button>
+        </button>
       </div>
     </div>
   )

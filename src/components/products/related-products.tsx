@@ -10,7 +10,7 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
 
   return (
     <section className="mt-20 mb-12">
-      <h2 className="text-xl font-semibold tracking-tight mb-6">
+      <h2 className="heading-section text-text-primary mb-8">
         You might also like
       </h2>
       <ProductGrid products={products} />

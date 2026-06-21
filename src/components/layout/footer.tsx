@@ -2,30 +2,28 @@ import Link from "next/link"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background">
-      <div className="editorial-container py-8">
-        <div className="grid gap-9 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+    <footer className="border-t border-border-subtle bg-bg-surface">
+      <div className="editorial-container py-20">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1">
             <Link href="/">
-              <span className="font-serif text-xl uppercase tracking-[0.48em] text-foreground">
-                STORE
+              <span className="font-serif text-2xl tracking-[0.3em] uppercase text-text-primary">
+                ATELIER
               </span>
             </Link>
-            <p className="mt-4 max-w-[210px] text-xs leading-5 text-secondary">
-              Timeless essentials crafted for modern living.
+            <p className="mt-6 max-w-xs text-sm leading-relaxed text-text-secondary">
+              Timeless objects and apparel crafted with intention. Premium materials, expert craftsmanship, enduring design.
             </p>
           </div>
 
           <div>
-            <h3 className="editorial-kicker mb-4 text-foreground">
-              Shop
-            </h3>
+            <h3 className="meta mb-6">Shop</h3>
             <ul className="space-y-3">
-              {["New Arrivals", "Clothing", "Accessories", "Sale", "All Products"].map((link) => (
+              {["New Arrivals", "Clothing", "Accessories", "Home", "All Products"].map((link) => (
                 <li key={link}>
                   <Link
                     href="#"
-                    className="text-xs text-secondary transition-colors hover:text-foreground"
+                    className="text-sm text-text-secondary transition-colors hover:text-text-primary"
                   >
                     {link}
                   </Link>
@@ -35,15 +33,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="editorial-kicker mb-4 text-foreground">
-              Company
-            </h3>
+            <h3 className="meta mb-6">Company</h3>
             <ul className="space-y-3">
-              {["About", "Careers", "Press", "Sustainability"].map((link) => (
+              {["About", "Journal", "Careers", "Sustainability", "Press"].map((link) => (
                 <li key={link}>
                   <Link
-                    href="#"
-                    className="text-xs text-secondary transition-colors hover:text-foreground"
+                    href={link === "About" ? "/about" : link === "Journal" ? "/blog" : "#"}
+                    className="text-sm text-text-secondary transition-colors hover:text-text-primary"
                   >
                     {link}
                   </Link>
@@ -53,33 +49,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="editorial-kicker mb-4 text-foreground">
-              Support
-            </h3>
+            <h3 className="meta mb-6">Support</h3>
             <ul className="space-y-3">
-              {["Help Center", "Shipping", "Returns", "Size Guide", "Contact"].map((link) => (
+              {["Help Center", "Shipping & Returns", "Size Guide", "Contact"].map((link) => (
                 <li key={link}>
                   <Link
                     href="#"
-                    className="text-xs text-secondary transition-colors hover:text-foreground"
-                  >
-                    {link}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="editorial-kicker mb-4 text-foreground">
-              Legal
-            </h3>
-            <ul className="space-y-3">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link) => (
-                <li key={link}>
-                  <Link
-                    href="#"
-                    className="text-xs text-secondary transition-colors hover:text-foreground"
+                    className="text-sm text-text-secondary transition-colors hover:text-text-primary"
                   >
                     {link}
                   </Link>
@@ -89,16 +65,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border pt-5 md:flex-row">
-          <p className="text-xs text-muted">
-            &copy; {new Date().getFullYear()} STORE. All rights reserved.
+        <div className="mt-20 flex flex-col items-center justify-between gap-6 border-t border-border-subtle pt-8 md:flex-row">
+          <p className="text-xs text-text-muted">
+            &copy; {new Date().getFullYear()} ATELIER. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            {["Twitter", "Instagram", "Facebook", "YouTube"].map((social) => (
+          <div className="flex items-center gap-8">
+            {["Instagram", "Pinterest", "Twitter"].map((social) => (
               <Link
                 key={social}
                 href="#"
-                className="text-xs text-muted transition-colors hover:text-foreground"
+                className="text-xs text-text-muted transition-colors hover:text-text-primary"
               >
                 {social}
               </Link>

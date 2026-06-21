@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { rateLimitMiddleware } from "@/lib/security/rate-limit"
+import { validateCsrf } from "@/lib/security/csrf"
 import { validateBody } from "@/lib/api-validation"
 import { updateProductSchema } from "@/lib/validations/product"
 import { getAdminProduct, updateProduct, deleteProduct } from "@/lib/actions/admin"
@@ -31,6 +32,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })
@@ -61,6 +65,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })

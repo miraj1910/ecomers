@@ -26,7 +26,7 @@ export function QuantitySelector({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-xl border border-border bg-foreground/[0.05]",
+        "inline-flex items-center border border-border-subtle",
         disabled && "opacity-50"
       )}
     >
@@ -35,11 +35,11 @@ export function QuantitySelector({
         disabled={!canDecrement}
         aria-label="Decrease quantity"
         className={cn(
-          "flex items-center justify-center text-secondary transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30",
-          size === "sm" ? "h-7 w-7" : "h-9 w-9"
+          "flex items-center justify-center text-text-secondary transition-colors hover:text-text-primary disabled:pointer-events-none disabled:opacity-30",
+          size === "sm" ? "h-8 w-8" : "h-11 w-11"
         )}
       >
-        <Minus className={size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5"} />
+        <Minus className="h-3.5 w-3.5" />
       </button>
 
       <input
@@ -53,8 +53,8 @@ export function QuantitySelector({
         disabled={disabled}
         aria-label="Quantity"
         className={cn(
-          "w-10 border-x border-border bg-transparent text-center font-medium tabular-nums text-foreground focus:outline-none",
-          size === "sm" ? "h-7 text-xs" : "h-9 text-sm"
+          "w-12 border-x border-border-subtle bg-transparent text-center font-medium tabular-nums text-text-primary focus:outline-none",
+          size === "sm" ? "h-8 text-xs" : "h-11 text-sm"
         )}
       />
 
@@ -63,11 +63,11 @@ export function QuantitySelector({
         disabled={!canIncrement}
         aria-label="Increase quantity"
         className={cn(
-          "flex items-center justify-center text-secondary transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30",
-          size === "sm" ? "h-7 w-7" : "h-9 w-9"
+          "flex items-center justify-center text-text-secondary transition-colors hover:text-text-primary disabled:pointer-events-none disabled:opacity-30",
+          size === "sm" ? "h-8 w-8" : "h-11 w-11"
         )}
       >
-        <Plus className={size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5"} />
+        <Plus className="h-3.5 w-3.5" />
       </button>
     </div>
   )

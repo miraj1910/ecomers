@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
 
 const categories = [
   {
@@ -27,39 +27,46 @@ const categories = [
 
 export function CategoriesSection() {
   return (
-    <section className="bg-background pb-10 sm:pb-14">
+    <section className="bg-bg-primary py-24">
       <div className="editorial-container">
-        <div className="grid gap-5 lg:grid-cols-3">
-          {categories.map((category) => (
-            <div
+        <div className="mb-14">
+          <span className="meta">Curated By</span>
+          <h2 className="heading-section mt-3 text-text-primary">Categories</h2>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {categories.map((category, i) => (
+            <motion.div
               key={category.slug}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
             >
               <Link
                 href={`/category/${category.slug}`}
-                className="group relative block overflow-hidden bg-foreground"
+                className="group relative block overflow-hidden bg-bg-surface"
               >
-                <div className="relative h-[170px] overflow-hidden sm:h-auto sm:aspect-[3/1.05]">
+                <div className="relative aspect-[4/5] lg:aspect-[3/4]">
                   <Image
                     src={category.image}
                     alt={`${category.title} collection`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="object-cover opacity-74 transition-transform duration-700 group-hover:scale-[1.035]"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black/28" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/60 to-transparent" />
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-                    <div>
-                    <h3 className="font-serif text-3xl font-normal tracking-normal text-white sm:text-4xl">
-                        {category.title}
-                      </h3>
-                    <p className="mt-4 inline-flex items-center gap-2 border-b border-white/80 pb-1 text-[0.68rem] font-bold uppercase tracking-[0.24em] text-white">
-                      Explore <ArrowRight className="h-3.5 w-3.5" />
-                    </p>
-                  </div>
+                <div className="absolute bottom-0 left-0 right-0 p-8">
+                  <h3 className="font-serif text-3xl font-normal text-text-primary">
+                    {category.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    {category.description}
+                  </p>
                 </div>
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

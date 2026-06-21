@@ -4,6 +4,7 @@ import { HeroSection } from "./hero-section"
 import { FeaturedProducts } from "./featured-products"
 import { CategoriesSection } from "./categories-section"
 import { JournalSection } from "./journal-section"
+import { NewsletterSection } from "./newsletter-section"
 
 interface FeaturedProductItem {
   name: string
@@ -22,6 +23,7 @@ export function LuxuryLanding({ products }: { products: FeaturedProductItem[] })
       <FeaturedProducts products={products} />
       <CategoriesSection />
       <JournalSection />
+      <NewsletterSection />
     </>
   )
 }

@@ -3,26 +3,25 @@ import Link from "next/link"
 import Image from "next/image"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
-import { Badge } from "@/components/ui/badge"
 import { getAllMDXContent } from "@/lib/content"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { BlogFrontmatter } from "@/types/content"
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Stories, guides, and insights from the STORE team.",
+  title: "Journal",
+  description: "Stories, guides, and insights from the ATELIER team.",
   alternates: { canonical: `${siteConfig.url}/blog` },
   openGraph: {
-    title: "Blog — " + siteConfig.name,
-    description: "Stories, guides, and insights from the STORE team.",
+    title: "Journal — " + siteConfig.name,
+    description: "Stories, guides, and insights from the ATELIER team.",
     url: `${siteConfig.url}/blog`,
     siteName: siteConfig.name,
     images: [{ url: `${siteConfig.url}${siteConfig.ogImage}` }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog — " + siteConfig.name,
-    description: "Stories, guides, and insights from the STORE team.",
+    title: "Journal — " + siteConfig.name,
+    description: "Stories, guides, and insights from the ATELIER team.",
     images: [`${siteConfig.url}${siteConfig.ogImage}`],
   },
 }
@@ -39,48 +38,51 @@ export default function BlogPage() {
   return (
     <Section>
       <Container>
-        <div className="max-w-2xl mb-16">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Blog
+        <div className="mb-16 max-w-2xl">
+          <span className="meta">Journal</span>
+          <h1 className="heading-hero mt-3 text-text-primary">
+            The Art of Living Well
           </h1>
-          <p className="mt-3 text-lg text-secondary">
-            Stories, guides, and insights from the STORE team.
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            Stories, guides, and inspiration for a more intentional and beautiful everyday.
           </p>
         </div>
 
-        <div className="grid gap-10 sm:grid-cols-2">
+        <div className="grid gap-12 sm:grid-cols-2">
           {posts.map((post, index) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
               className="group"
             >
-              <article className="overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 group-hover:border-white/[0.12]">
-                <div className="relative aspect-[16/9] overflow-hidden bg-surface">
+              <article>
+                <div className="product-image-container relative aspect-[4/3]">
                   <Image
                     src={post.frontmatter.coverImage}
                     alt={post.frontmatter.title}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover"
                     loading={index === 0 ? "eager" : "lazy"}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
-                <div className="p-6">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {post.frontmatter.tags?.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="secondary" size="sm">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <h2 className="text-xl font-semibold leading-snug text-white group-hover:text-accent">
+                <div className="mt-6 space-y-3">
+                  {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.frontmatter.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} className="text-[0.55rem] font-medium tracking-[0.1em] uppercase text-text-secondary bg-border-subtle px-2.5 py-1">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <h2 className="heading-product text-text-primary group-hover:text-text-secondary transition-colors">
                     {post.frontmatter.title}
                   </h2>
-                  <p className="mt-2 text-sm text-secondary line-clamp-2">
+                  <p className="text-sm text-text-secondary leading-relaxed line-clamp-2">
                     {post.frontmatter.description}
                   </p>
-                  <p className="mt-4 text-xs text-muted">
+                  <p className="text-xs text-text-muted">
                     {new Date(post.frontmatter.date).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",

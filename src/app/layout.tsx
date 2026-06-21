@@ -1,14 +1,12 @@
 import "@/lib/env"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { cookies } from "next/headers"
+import { Inter, Playfair_Display } from "next/font/google"
 import { Providers } from "./providers"
 import { Shell } from "@/components/layout/shell"
 import { ToastContainer } from "@/components/shared/toast-container"
 import { JsonLdScript } from "@/components/seo/json-ld-script"
 import { organizationSchema, websiteSchema } from "@/lib/seo/json-ld"
 import { siteConfig } from "@/lib/seo/metadata"
-import { themeScript } from "@/lib/theme-script"
 import "./globals.css"
 
 const inter = Inter({
@@ -17,14 +15,21 @@ const inter = Inter({
   display: "swap",
 })
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+})
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name + " — Modern Essentials",
+    default: siteConfig.name + " — Timeless Objects & Apparel",
     template: `%s — ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ["ecommerce", "fashion", "minimalist", "modern", "store"],
+  keywords: ["ecommerce", "fashion", "minimalist", "modern", "store", "luxury"],
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   publisher: siteConfig.name,
@@ -32,14 +37,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: siteConfig.locale,
     siteName: siteConfig.name,
-    title: siteConfig.name + " — Modern Essentials",
+    title: siteConfig.name + " — Timeless Objects & Apparel",
     description: siteConfig.description,
     url: siteConfig.url,
     images: [{ url: `${siteConfig.url}${siteConfig.ogImage}` }],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.name + " — Modern Essentials",
+    title: siteConfig.name + " — Timeless Objects & Apparel",
     description: siteConfig.description,
     images: [`${siteConfig.url}${siteConfig.ogImage}`],
     creator: siteConfig.twitterHandle,
@@ -63,27 +68,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const cookieStore = await cookies()
-  const themeCookie = cookieStore.get("theme")?.value
-  const themeClass =
-    themeCookie === "light" || themeCookie === "dark"
-      ? themeCookie
-      : "light"
-
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${themeClass}`}
+      className={`${inter.variable} ${playfair.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        <div
-          className="hidden"
-          aria-hidden="true"
-          dangerouslySetInnerHTML={{
-            __html: `<script id="theme-init">${themeScript}</script>`,
-          }}
-        />
+      <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
         <JsonLdScript
           data={[
             organizationSchema({

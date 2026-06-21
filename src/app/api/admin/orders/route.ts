@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { rateLimitMiddleware } from "@/lib/security/rate-limit"
+import { validateCsrf } from "@/lib/security/csrf"
 import { validateSearchParams } from "@/lib/api-validation"
 import { orderStatusFilterSchema } from "@/lib/validations/admin"
 import { getAdminOrders, updateOrderStatus } from "@/lib/actions/admin"
@@ -30,6 +31,9 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const csrf = validateCsrf(request)
+  if (csrf) return csrf
+
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 401 })

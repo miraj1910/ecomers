@@ -6,27 +6,26 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, id, type, ...props }, ref) => (
-    <div className="w-full">
-      {label && (
-        <label
-          htmlFor={id}
-          className="mb-1.5 block text-sm font-medium text-secondary"
-        >
-          {label}
-        </label>
-      )}
-      <input
-        id={id}
-        type={type}
-        ref={ref}
-        className={cn(
-          "flex h-11 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-          className
+  ({ className, type, label, id, ...props }, ref) => {
+    return (
+      <div className="w-full">
+        {label && (
+          <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-text-secondary">
+            {label}
+          </label>
         )}
-        {...props}
-      />
-    </div>
-  )
+        <input
+          type={type}
+          id={id}
+          className={cn(
+            "flex h-11 w-full bg-transparent border-b border-border-subtle px-0 text-base text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-text-primary transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      </div>
+    )
+  }
 )
 Input.displayName = "Input"

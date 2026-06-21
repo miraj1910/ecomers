@@ -1,8 +1,9 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { CACHE_TAGS } from "@/lib/cache"
 import { createReviewSchema, updateReviewSchema } from "@/lib/validations/reviews"
 import type { ReviewItem, ReviewPageData, ProductRatingSummary, ServerActionResult } from "@/types/prisma"
 
@@ -123,6 +124,7 @@ export async function updateReview(
     if (updatedProduct) {
       revalidatePath(`/products/${updatedProduct.slug}`)
     }
+    revalidateTag(CACHE_TAGS.products, 'max')
 
     return { success: true, data: review as ReviewItem }
   } catch (error) {
@@ -149,6 +151,7 @@ export async function deleteReview(reviewId: string): Promise<ServerActionResult
     if (deletedProduct) {
       revalidatePath(`/products/${deletedProduct.slug}`)
     }
+    revalidateTag(CACHE_TAGS.products, 'max')
 
     return { success: true }
   } catch (error) {

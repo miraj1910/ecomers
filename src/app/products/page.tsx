@@ -9,7 +9,7 @@ import { getStoreProducts, getStoreCategories } from "@/actions/store-products"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct } from "@/sanity"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 interface Props {
   searchParams: Promise<{
@@ -161,15 +161,17 @@ export default async function ProductsPage({ searchParams }: Props) {
   return (
     <Section>
       <Container>
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            {category
-              ? categoryList.find((c) => c.slug === category)?.title ?? "Products"
-              : "All Products"}
-          </h1>
-          <p className="mt-3 text-sm text-secondary">
-            {filtered.length}{" "}
-            {filtered.length === 1 ? "product" : "products"}
+        <div className="mb-12 flex items-end justify-between">
+          <div>
+            <span className="meta">Catalog</span>
+            <h1 className="heading-section mt-2 text-text-primary">
+              {category
+                ? categoryList.find((c) => c.slug === category)?.title ?? "Products"
+                : "All Products"}
+            </h1>
+          </div>
+          <p className="text-sm text-text-secondary hidden sm:block">
+            {filtered.length} {filtered.length === 1 ? "product" : "products"}
           </p>
         </div>
 
@@ -177,7 +179,6 @@ export default async function ProductsPage({ searchParams }: Props) {
           <ProductFilters
             categories={categoryList}
             selectedCategory={category ?? "all"}
-            className="shrink-0"
           />
 
           <div className="min-w-0 flex-1">

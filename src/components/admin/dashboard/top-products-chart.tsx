@@ -36,24 +36,23 @@ export function TopProductsChart({ data }: { data: TopProduct[] }) {
               <YAxis
                 type="category"
                 dataKey="name"
-                tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                tick={{ fontSize: 11, fill: "var(--color-muted)" }}
                 tickLine={false}
                 axisLine={false}
                 width={120}
               />
               <Tooltip
                 contentStyle={{
-                  background: "var(--color-card)",
+                  background: "var(--color-surface)",
                   border: "1px solid var(--color-border)",
-                  borderRadius: "8px",
                   fontSize: "13px",
+                  color: "var(--color-foreground)",
                 }}
                 formatter={(value) => [Number(value), "Units sold"]}
               />
               <Bar
                 dataKey="sold"
-                fill="var(--color-foreground)"
-                radius={[0, 4, 4, 0]}
+                fill="var(--color-accent)"
                 barSize={20}
               />
             </BarChart>

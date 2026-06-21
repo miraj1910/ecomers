@@ -1,12 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Container } from "@/components/layout/container"
 import { Lock, Loader2 } from "lucide-react"
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -28,8 +26,7 @@ export default function AdminLoginPage() {
         throw new Error(err.error || "Invalid password")
       }
 
-      router.push("/admin")
-      router.refresh()
+      window.location.href = "/admin"
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed")
       setLoading(false)
@@ -39,20 +36,20 @@ export default function AdminLoginPage() {
   return (
     <Container>
       <div className="flex min-h-screen items-center justify-center py-12">
-        <div className="bg-surface border border-border w-full max-w-sm space-y-6 rounded-3xl p-8">
+        <div className="bg-bg-surface border border-border-subtle w-full max-w-sm space-y-6 p-8">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent/20 bg-accent/10">
-              <Lock className="h-6 w-6 text-accent" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border border-text-primary/10 bg-text-primary/5">
+              <Lock className="h-6 w-6 text-text-primary" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Admin Access</h1>
-            <p className="mt-1 text-sm text-secondary">
+            <h1 className="font-serif text-2xl text-text-primary">Admin Access</h1>
+            <p className="mt-1 text-sm text-text-secondary">
               Enter the admin password to continue
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <p className="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-center text-sm text-red-300">
+              <p className="border border-error/20 bg-error/5 px-3 py-2 text-center text-sm text-error">
                 {error}
               </p>
             )}
@@ -63,13 +60,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter admin password"
               autoFocus
-              className="w-full rounded-xl border border-border bg-foreground/[0.07] px-4 py-3 text-sm text-white placeholder:text-secondary focus:border-accent focus:outline-none backdrop-blur-xl"
+              className="w-full border-b border-border-subtle bg-transparent px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-text-primary focus:outline-none"
             />
 
             <button
               type="submit"
               disabled={loading || !password}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 bg-text-primary px-4 py-3 text-sm font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

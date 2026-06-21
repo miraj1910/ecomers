@@ -14,13 +14,13 @@ const icons = {
 
 const styles: Record<string, string> = {
   success:
-    "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300",
+    "border-success/20 bg-success/5 text-success",
   error:
-    "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300",
+    "border-error/20 bg-error/5 text-error",
   info:
-    "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300",
+    "border-border-subtle bg-bg-surface text-text-primary",
   warning:
-    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300",
+    "border-amber-200 bg-amber-50 text-amber-800",
 }
 
 export function ToastContainer() {
@@ -43,7 +43,7 @@ export function ToastContainer() {
               exit={{ opacity: 0, x: 100, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               className={cn(
-                "pointer-events-auto flex gap-3 rounded-xl border p-4 shadow-lg",
+                "pointer-events-auto flex gap-3 border p-4",
                 styles[toast.variant ?? "info"]
               )}
             >

@@ -38,7 +38,7 @@ export function LowStockAlerts() {
             Inventory Alerts
           </p>
           {totalAlerts > 0 && (
-            <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-error/10 text-error">
               {totalAlerts}
             </span>
           )}
@@ -61,10 +61,10 @@ export function LowStockAlerts() {
             {outOfStockCount > 0 && (
               <div className="flex items-center justify-between px-6 py-3">
                 <div className="flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-red-500" />
-                  <span className="text-sm font-medium">Out of stock</span>
+                  <XCircle className="h-4 w-4 text-error" />
+                  <span className="text-sm font-medium text-foreground">Out of stock</span>
                 </div>
-                <span className="text-sm font-medium text-red-500">
+                <span className="text-sm font-medium text-error">
                   {outOfStockCount}
                 </span>
               </div>
@@ -75,14 +75,14 @@ export function LowStockAlerts() {
                 className="flex items-center justify-between px-6 py-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{item.productId}</p>
+                  <p className="text-sm font-medium text-foreground">{item.productId}</p>
                   <p className="mt-0.5 text-xs text-secondary">
                     SKU: {item.sku} &middot; Threshold: {item.threshold}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm font-medium text-amber-500">
+                  <AlertTriangle className="h-4 w-4 text-accent" />
+                  <span className="text-sm font-medium text-accent">
                     {item.stock}
                   </span>
                 </div>
@@ -91,7 +91,7 @@ export function LowStockAlerts() {
             {items.length > 5 && (
               <Link
                 href="/admin/inventory"
-                className="flex items-center justify-center px-6 py-3 text-sm text-secondary hover:text-foreground hover:bg-muted transition-colors"
+                className="flex items-center justify-center px-6 py-3 text-sm text-secondary hover:text-foreground hover:bg-foreground/5 transition-colors"
               >
                 View all {items.length} low stock items
               </Link>

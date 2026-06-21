@@ -64,10 +64,10 @@ const statusConfig: Record<
 }
 
 const paymentStatusColor: Record<string, string> = {
-  PENDING: "text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400",
-  PAID: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
-  REFUNDED: "text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400",
-  FAILED: "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400",
+  PENDING: "text-accent bg-accent/10",
+  PAID: "text-success bg-success/10",
+  REFUNDED: "text-accent bg-accent/10",
+  FAILED: "text-error bg-error/10",
 }
 
 const statusOptions = [
@@ -89,6 +89,9 @@ export function AdminOrdersClient({ initialData }: { initialData: PageData }) {
   const [newStatus, setNewStatus] = useState("")
   const [updating, setUpdating] = useState<string | null>(null)
   const [detailModal, setDetailModal] = useState<Order | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkOrderStatus, setBulkOrderStatus] = useState("PROCESSING")
+  const [bulkRunning, setBulkRunning] = useState(false)
 
   const fetchPage = useCallback(
     async (page: number, status?: string, q?: string) => {
@@ -105,6 +108,42 @@ export function AdminOrdersClient({ initialData }: { initialData: PageData }) {
     },
     []
   )
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === data.orders.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(data.orders.map((o) => o.id)))
+    }
+  }
+
+  const executeBulkStatus = useCallback(async () => {
+    if (selectedIds.size === 0) return
+    setBulkRunning(true)
+    try {
+      const res = await fetch("/api/admin/orders/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), orderStatus: bulkOrderStatus }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || "Bulk status update failed")
+      setSelectedIds(new Set())
+      fetchPage(data.page, statusFilter, search)
+      router.refresh()
+    } catch (err) {
+      console.error("Bulk status update failed:", err)
+    }
+    setBulkRunning(false)
+  }, [selectedIds, bulkOrderStatus, data.page, statusFilter, search, fetchPage, router])
 
   const handleSearch = useCallback(() => {
     fetchPage(1, statusFilter, search)
@@ -176,10 +215,43 @@ export function AdminOrdersClient({ initialData }: { initialData: PageData }) {
         </Button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-foreground/[0.04] px-4 py-3">
+          <span className="text-sm font-medium text-foreground">
+            {selectedIds.size} selected
+          </span>
+          <select
+            className="rounded-xl border border-border bg-foreground/[0.07] px-3 py-2 text-sm text-foreground backdrop-blur-xl"
+            value={bulkOrderStatus}
+            onChange={(e) => setBulkOrderStatus(e.target.value)}
+          >
+            {statusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <Button size="sm" onClick={executeBulkStatus} disabled={bulkRunning}>
+            {bulkRunning ? "Updating..." : "Update Status"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setSelectedIds(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-border">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-foreground/[0.05]">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-secondary">
+                <input
+                  type="checkbox"
+                  checked={data.orders.length > 0 && selectedIds.size === data.orders.length}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 rounded border-border"
+                />
+              </th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase text-secondary">
                 Order
               </th>
@@ -212,6 +284,14 @@ export function AdminOrdersClient({ initialData }: { initialData: PageData }) {
                 key={order.id}
                 className="transition-colors hover:bg-foreground/[0.05]"
               >
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(order.id)}
+                    onChange={() => toggleSelect(order.id)}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <span className="text-sm font-medium text-foreground">
                     #{order.id.slice(0, 8)}

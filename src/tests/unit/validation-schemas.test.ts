@@ -5,27 +5,41 @@ import { createReviewSchema, updateReviewSchema } from "@/lib/validations/review
 import { addressSchema } from "@/lib/validations/address"
 import { createOrderSchema } from "@/lib/validations/order"
 
+const validShipping = {
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  phone: "+1234567890",
+  addressLine1: "123 Main St",
+  city: "New York",
+  state: "NY",
+  country: "US",
+  postalCode: "10001",
+}
+
 describe("checkout session schema", () => {
   it("accepts valid items", () => {
     const result = checkoutSessionSchema.safeParse({
       items: [{ productId: "p1", name: "T-shirt", price: 29.99, quantity: 2 }],
+      shipping: validShipping,
     })
     expect(result.success).toBe(true)
   })
 
   it("rejects empty items", () => {
-    const result = checkoutSessionSchema.safeParse({ items: [] })
+    const result = checkoutSessionSchema.safeParse({ items: [], shipping: validShipping })
     expect(result.success).toBe(false)
   })
 
   it("rejects missing items", () => {
-    const result = checkoutSessionSchema.safeParse({})
+    const result = checkoutSessionSchema.safeParse({ shipping: validShipping })
     expect(result.success).toBe(false)
   })
 
   it("rejects negative price", () => {
     const result = checkoutSessionSchema.safeParse({
       items: [{ productId: "p1", name: "T-shirt", price: -5, quantity: 1 }],
+      shipping: validShipping,
     })
     expect(result.success).toBe(false)
   })
@@ -33,6 +47,14 @@ describe("checkout session schema", () => {
   it("rejects zero quantity", () => {
     const result = checkoutSessionSchema.safeParse({
       items: [{ productId: "p1", name: "T-shirt", price: 10, quantity: 0 }],
+      shipping: validShipping,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it("rejects missing shipping", () => {
+    const result = checkoutSessionSchema.safeParse({
+      items: [{ productId: "p1", name: "T-shirt", price: 10, quantity: 1 }],
     })
     expect(result.success).toBe(false)
   })

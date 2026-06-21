@@ -1,17 +1,20 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/middleware-helpers"
 import { z } from "zod"
+import { CACHE_TAGS } from "@/lib/cache"
 import { createProductSchema, updateProductSchema, productQuerySchema } from "@/lib/validations/product"
 import type { CreateProductInput, UpdateProductInput } from "@/lib/validations/product"
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from "@/lib/email/triggers"
 
 export async function getAdminProducts(input: {
   page?: number
   pageSize?: number
   search?: string
   category?: string
+  categoryId?: string
   status?: string
   sortBy?: string
   sortOrder?: string
@@ -34,6 +37,10 @@ export async function getAdminProducts(input: {
     where.category = parsed.category
   }
 
+  if (parsed.categoryId) {
+    where.categoryId = parsed.categoryId
+  }
+
   if (parsed.status) {
     where.status = parsed.status
   }
@@ -52,11 +59,17 @@ export async function getAdminProducts(input: {
     prisma.product.count({ where }),
   ])
 
-  const categories = await prisma.product.findMany({
-    where: { deletedAt: null, category: { not: null } },
-    select: { category: true },
-    distinct: ["category"],
-  })
+  const [stringCategories, dbCategories] = await Promise.all([
+    prisma.product.findMany({
+      where: { deletedAt: null, category: { not: null } },
+      select: { category: true },
+      distinct: ["category"],
+    }),
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+  ])
 
   return {
     products: products.map((p) => ({
@@ -65,6 +78,8 @@ export async function getAdminProducts(input: {
       slug: p.slug,
       description: p.description,
       category: p.category,
+      categoryId: p.categoryId,
+      categoryName: dbCategories.find((c) => c.id === p.categoryId)?.name ?? null,
       brand: p.brand,
       price: Number(p.price),
       discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
@@ -79,7 +94,8 @@ export async function getAdminProducts(input: {
     page: parsed.page,
     pageSize: parsed.pageSize,
     totalPages: Math.ceil(total / parsed.pageSize),
-    categories: categories.map((c) => c.category).filter(Boolean) as string[],
+    categories: stringCategories.map((c) => c.category).filter(Boolean) as string[],
+    dbCategories: dbCategories.map((c) => ({ id: c.id, name: c.name, slug: c.slug })),
   }
 }
 
@@ -100,6 +116,7 @@ export async function getAdminProduct(id: string) {
     slug: product.slug,
     description: product.description ?? "",
     category: product.category ?? "",
+    categoryId: product.categoryId,
     brand: product.brand ?? "",
     price: Number(product.price),
     discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
@@ -137,6 +154,7 @@ export async function createProduct(input: CreateProductInput) {
       slug: parsed.slug,
       description: parsed.description ?? "",
       category: parsed.category ?? "",
+      categoryId: parsed.categoryId ?? null,
       brand: parsed.brand ?? "",
       price: parsed.price,
       discountPrice: parsed.discountPrice ?? null,
@@ -148,6 +166,8 @@ export async function createProduct(input: CreateProductInput) {
   })
 
   revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
   return { id: product.id }
 }
 
@@ -197,6 +217,7 @@ export async function updateProduct(input: UpdateProductInput) {
   if (parsed.slug !== undefined) data.slug = parsed.slug
   if (parsed.description !== undefined) data.description = parsed.description
   if (parsed.category !== undefined) data.category = parsed.category
+  if (parsed.categoryId !== undefined) data.categoryId = parsed.categoryId ?? null
   if (parsed.brand !== undefined) data.brand = parsed.brand
   if (parsed.price !== undefined) data.price = parsed.price
   if (parsed.discountPrice !== undefined) data.discountPrice = parsed.discountPrice
@@ -212,6 +233,8 @@ export async function updateProduct(input: UpdateProductInput) {
 
   revalidatePath("/admin/products")
   revalidatePath(`/admin/products/${parsed.id}`)
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
 }
 
 export async function deleteProduct(id: string) {
@@ -230,6 +253,8 @@ export async function deleteProduct(id: string) {
   })
 
   revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
 }
 
 export async function getAdminUsers(input: {
@@ -408,6 +433,46 @@ export async function updateOrderStatus(orderId: string, orderStatus: string) {
   })
 
   revalidatePath("/admin/orders")
+  revalidateTag(CACHE_TAGS.orders, 'max')
+
+  // Send email notifications for status changes
+  if (orderStatus === "SHIPPED" || orderStatus === "DELIVERED") {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    })
+
+    if (order) {
+      const emailData = {
+        id: order.id,
+        totalAmount: Number(order.totalAmount),
+        shippingName: order.shippingName,
+        shippingEmail: order.shippingEmail,
+        shippingStreet: order.shippingStreet,
+        shippingCity: order.shippingCity,
+        shippingState: order.shippingState,
+        shippingPostal: order.shippingPostal,
+        shippingCountry: order.shippingCountry,
+        items: order.items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+          size: item.size,
+          image: item.image,
+        })),
+      }
+
+      if (orderStatus === "SHIPPED") {
+        sendOrderShippedEmail(emailData).catch((err) => {
+          console.error(`[Admin] Failed to send shipped email for order ${orderId}:`, err)
+        })
+      } else {
+        sendOrderDeliveredEmail(emailData).catch((err) => {
+          console.error(`[Admin] Failed to send delivered email for order ${orderId}:`, err)
+        })
+      }
+    }
+  }
 }
 
 export async function updateBulkStock(
@@ -425,4 +490,53 @@ export async function updateBulkStock(
   )
 
   revalidatePath("/admin/inventory")
+  revalidateTag(CACHE_TAGS.inventory, 'max')
+  revalidateTag(CACHE_TAGS.products, 'max')
+}
+
+export async function bulkDeleteProducts(ids: string[]) {
+  await requireAdmin()
+
+  await prisma.product.updateMany({
+    where: { id: { in: ids }, deletedAt: null },
+    data: { deletedAt: new Date() },
+  })
+
+  revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
+}
+
+export async function bulkUpdateProducts(
+  ids: string[],
+  data: { status?: "ACTIVE" | "INACTIVE"; categoryId?: string | null; category?: string }
+) {
+  await requireAdmin()
+
+  const updateData: Record<string, unknown> = {}
+  if (data.status !== undefined) updateData.status = data.status
+  if (data.categoryId !== undefined) updateData.categoryId = data.categoryId || null
+  if (data.category !== undefined) updateData.category = data.category
+
+  await prisma.product.updateMany({
+    where: { id: { in: ids }, deletedAt: null },
+    data: updateData,
+  })
+
+  revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
+}
+
+export async function bulkPublishProducts(ids: string[], status: "ACTIVE" | "INACTIVE") {
+  await requireAdmin()
+
+  await prisma.product.updateMany({
+    where: { id: { in: ids }, deletedAt: null },
+    data: { status },
+  })
+
+  revalidatePath("/admin/products")
+  revalidateTag(CACHE_TAGS.products, 'max')
+  revalidateTag(CACHE_TAGS.featured, 'max')
 }

@@ -19,7 +19,7 @@ import { getStoreProductsByCategory, getStoreCategories } from "@/actions/store-
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct, SanityCategory } from "@/sanity"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -153,10 +153,9 @@ export default async function CategoryPage({ params }: Props) {
           <Section>
             <Container>
               <div className="mb-12">
-                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                  {categoryTitle}
-                </h1>
-                <p className="mt-2 text-secondary">
+                <span className="meta">Collection</span>
+                <h1 className="heading-section mt-2 text-text-primary">{categoryTitle}</h1>
+                <p className="mt-2 text-sm text-text-secondary">
                   {dbProducts.length} {dbProducts.length === 1 ? "product" : "products"}
                 </p>
               </div>
@@ -202,10 +201,9 @@ export default async function CategoryPage({ params }: Props) {
           <Section>
             <Container>
               <div className="mb-12">
-                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                  {categoryTitle}
-                </h1>
-                <p className="mt-2 text-secondary">
+                <span className="meta">Collection</span>
+                <h1 className="heading-section mt-2 text-text-primary">{categoryTitle}</h1>
+                <p className="mt-2 text-sm text-text-secondary">
                   {dbProducts.length} {dbProducts.length === 1 ? "product" : "products"}
                 </p>
               </div>
@@ -237,10 +235,9 @@ export default async function CategoryPage({ params }: Props) {
     <Section>
       <Container>
         <div className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            {categoryTitle}
-          </h1>
-          <p className="mt-2 text-secondary">
+          <span className="meta">Collection</span>
+          <h1 className="heading-section mt-2 text-text-primary">{categoryTitle}</h1>
+          <p className="mt-2 text-sm text-text-secondary">
             {products.length} {products.length === 1 ? "product" : "products"}
           </p>
         </div>

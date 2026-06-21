@@ -9,8 +9,24 @@ export const checkoutItemSchema = z.object({
   image: z.string().url().optional().or(z.literal("")),
 })
 
+export const shippingInfoSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(1, "Phone is required"),
+  addressLine1: z.string().min(1, "Address is required"),
+  addressLine2: z.string().optional().default(""),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  country: z.string().min(1, "Country is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+})
+
 export const checkoutSessionSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, "At least one item is required"),
+  shipping: shippingInfoSchema,
+  couponCode: z.string().optional(),
+  discountAmount: z.number().min(0).optional().default(0),
 })
 
 export type CheckoutSessionInput = z.infer<typeof checkoutSessionSchema>

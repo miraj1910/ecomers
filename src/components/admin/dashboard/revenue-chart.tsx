@@ -38,19 +38,19 @@ export function RevenueChart({ data }: { data: DataPoint[] }) {
             <AreaChart data={formattedData}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-purple-light)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="var(--color-purple-light)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                tick={{ fontSize: 11, fill: "var(--color-muted)" }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                tick={{ fontSize: 11, fill: "var(--color-muted)" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `$${v}`}
@@ -58,11 +58,10 @@ export function RevenueChart({ data }: { data: DataPoint[] }) {
               />
               <Tooltip
                 contentStyle={{
-                  background: "var(--color-popover)",
+                  background: "var(--color-surface)",
                   border: "1px solid var(--color-border)",
-                  borderRadius: "14px",
                   fontSize: "13px",
-                  color: "var(--color-popover-foreground)",
+                  color: "var(--color-foreground)",
                 }}
                 formatter={(value) => [`$${Number(value).toFixed(2)}`, "Revenue"]}
                 labelFormatter={(label) => label}
@@ -70,7 +69,7 @@ export function RevenueChart({ data }: { data: DataPoint[] }) {
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="var(--color-purple-light)"
+                stroke="var(--color-accent)"
                 fill="url(#revenueGrad)"
                 strokeWidth={2}
               />

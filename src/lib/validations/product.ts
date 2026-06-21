@@ -11,6 +11,7 @@ export const createProductSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
   description: z.string().max(5000).optional().default(""),
   category: z.string().max(200).optional().default(""),
+  categoryId: z.string().max(100).optional().nullable().default(null),
   brand: z.string().max(200).optional().default(""),
   price: z.coerce.number().min(0, "Price must be non-negative").max(999999.99),
   discountPrice: z.coerce
@@ -35,6 +36,7 @@ export const productQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().max(200).optional(),
   category: z.string().max(200).optional(),
+  categoryId: z.string().max(100).optional(),
   status: ProductStatusEnum.optional(),
   sortBy: z
     .enum(["name", "price", "stock", "createdAt", "updatedAt"])

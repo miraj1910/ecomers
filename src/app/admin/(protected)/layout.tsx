@@ -17,7 +17,7 @@ export default async function AdminProtectedLayout({
   if (adminCookie?.value === ADMIN_COOKIE_VALUE) {
     console.log("[admin/layout] admin access granted by password cookie")
     return (
-      <div className="flex min-h-screen text-white">
+      <div className="flex min-h-screen text-foreground">
         <AdminSidebar />
         <main className="flex-1 overflow-auto p-6 lg:p-8">
           {children}
@@ -47,7 +47,7 @@ export default async function AdminProtectedLayout({
 
   console.log("[admin/layout] admin access granted for", session.user.email)
   return (
-    <div className="flex min-h-screen text-white">
+    <div className="flex min-h-screen text-foreground">
       <AdminSidebar />
       <main className="flex-1 overflow-auto p-6 lg:p-8">
         {children}
