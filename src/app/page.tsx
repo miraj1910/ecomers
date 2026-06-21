@@ -3,7 +3,7 @@ import { siteConfig } from "@/lib/seo/metadata"
 import { LuxuryLanding } from "@/components/shared/luxury-landing"
 import { getFeaturedStoreProducts } from "@/actions/store-products"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   alternates: { canonical: siteConfig.url },
@@ -29,8 +29,8 @@ export default async function HomePage() {
   let storeProducts: Awaited<ReturnType<typeof getFeaturedStoreProducts>> = []
   try {
     storeProducts = await getFeaturedStoreProducts(8)
-  } catch (error) {
-    console.error("Failed to load featured products from database:", error)
+  } catch {
+    // Database unavailable during build — render without featured products
   }
 
   const products = storeProducts.map((p) => ({
