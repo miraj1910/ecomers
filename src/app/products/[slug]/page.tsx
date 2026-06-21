@@ -28,7 +28,7 @@ import { getProductRating } from "@/actions/reviews"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct } from "@/sanity"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ slug: string }>

@@ -19,7 +19,7 @@ import { getStoreProductsByCategory, getStoreCategories } from "@/actions/store-
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct, SanityCategory } from "@/sanity"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ slug: string }>

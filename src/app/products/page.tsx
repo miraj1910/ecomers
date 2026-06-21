@@ -9,7 +9,7 @@ import { getStoreProducts, getStoreCategories } from "@/actions/store-products"
 import { siteConfig } from "@/lib/seo/metadata"
 import type { SanityProduct } from "@/sanity"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 interface Props {
   searchParams: Promise<{

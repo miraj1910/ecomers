@@ -9,23 +9,6 @@ function debug(...args: unknown[]) {
   }
 }
 
-debug("GOOGLE_CLIENT_ID set:", !!process.env.GOOGLE_CLIENT_ID)
-debug("GOOGLE_CLIENT_SECRET set:", !!process.env.GOOGLE_CLIENT_SECRET)
-debug("AUTH_SECRET set:", !!process.env.AUTH_SECRET)
-debug("NEXTAUTH_SECRET set:", !!process.env.NEXTAUTH_SECRET)
-debug("NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
-debug("AUTH_URL:", process.env.AUTH_URL)
-
-// Test database connectivity at startup (logged, not blocking)
-;(async () => {
-  try {
-    await prisma.$queryRaw`SELECT 1`
-    debug("Database connectivity: OK")
-  } catch (e) {
-    console.error("[auth] Database connectivity FAILED at startup:", e)
-  }
-})()
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [

@@ -35,32 +35,38 @@ const clientSchema = z.object({
 type ParsedServer = z.infer<typeof serverSchema>
 type ParsedClient = z.infer<typeof clientSchema>
 
-function parseEnv() {
+let _env: (ParsedServer & ParsedClient) | null = null
+
+function parseEnv(): ParsedServer & ParsedClient {
   const parsedServer = serverSchema.safeParse(process.env)
   if (!parsedServer.success) {
-    console.error("\n❌ Invalid server environment variables:")
+    console.warn("\n⚠️ Invalid server environment variables:")
     for (const issue of parsedServer.error.issues) {
-      console.error(`  - ${issue.path.join(".")}: ${issue.message}`)
+      console.warn(`  - ${issue.path.join(".")}: ${issue.message}`)
     }
-    console.error("\nServer will not start until these are fixed.\n")
-    throw new Error("Invalid server environment variables")
+    console.warn("Some features may not work until these are fixed.\n")
   }
 
   const parsedClient = clientSchema.safeParse(process.env)
   if (!parsedClient.success) {
-    console.error("\n❌ Invalid client environment variables:")
+    console.warn("\n⚠️ Invalid client environment variables:")
     for (const issue of parsedClient.error.issues) {
-      console.error(`  - ${issue.path.join(".")}: ${issue.message}`)
+      console.warn(`  - ${issue.path.join(".")}: ${issue.message}`)
     }
-    console.error("\n")
-    throw new Error("Invalid client environment variables")
+    console.warn("\n")
   }
 
-  return { ...parsedServer.data, ...parsedClient.data }
+  return {
+    ...(parsedServer.success ? parsedServer.data : {}),
+    ...(parsedClient.success ? parsedClient.data : {}),
+  } as ParsedServer & ParsedClient
 }
 
-const env = parseEnv()
-
-export { env }
+export function getEnv(): ParsedServer & ParsedClient {
+  if (!_env) {
+    _env = parseEnv()
+  }
+  return _env
+}
 
 export type { ParsedServer, ParsedClient }
