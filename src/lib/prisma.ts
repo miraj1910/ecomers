@@ -43,13 +43,15 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma
 }
 
-// Startup health check — log but don't crash
-;(async function healthCheck() {
-  try {
-    const start = Date.now()
-    await prisma.$queryRaw`SELECT 1 AS ok`
-    console.log("[prisma] health check OK", `${Date.now() - start}ms`)
-  } catch (e) {
-    console.error("[prisma] health check FAILED — database unreachable:", e)
-  }
-})()
+// Startup health check — log but don't crash (skipped during build)
+if (process.env.NEXT_PHASE !== "phase-production-build") {
+  ;(async function healthCheck() {
+    try {
+      const start = Date.now()
+      await prisma.$queryRaw`SELECT 1 AS ok`
+      console.log("[prisma] health check OK", `${Date.now() - start}ms`)
+    } catch (e) {
+      console.error("[prisma] health check FAILED — database unreachable:", e)
+    }
+  })()
+}
