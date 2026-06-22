@@ -28,7 +28,6 @@ const pool = new Pool({
   max: process.env.NODE_ENV === "production" ? 5 : 3,
   connectionTimeoutMillis: 15000,
   idleTimeoutMillis: 30000,
-  family: 4,
 })
 
 pool.on("error", (err) => {
